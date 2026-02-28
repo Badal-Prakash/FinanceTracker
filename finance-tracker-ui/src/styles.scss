@@ -1,0 +1,89 @@
+/* You can add global styles to this file, and also import other style files */
+/* Import Tailwind if using CDN — otherwise install via npm */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global resets */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: #f9fafb;
+  color: #111827;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ── Light Mode Variables ─────────────────────────────── */
+:root {
+  --bg-page:        #f8fafc;
+  --bg-sidebar:     #ffffff;
+  --bg-card:        #ffffff;
+  --bg-hover:       #f1f5f9;
+  --bg-active:      #eef2ff;
+  --border:         #e2e8f0;
+  --text-primary:   #0f172a;
+  --text-secondary: #64748b;
+  --text-muted:     #94a3b8;
+  --input-bg:       #f8fafc;
+  --input-border:   #e2e8f0;
+}
+
+/* ── Dark Mode Variables ─────────────────────────────── */
+:root.dark-mode {
+  --bg-page:        #0f1117;
+  --bg-sidebar:     #161b27;
+  --bg-card:        #1e2535;
+  --bg-hover:       #252d3d;
+  --bg-active:      #1e2a45;
+  --border:         #2a3347;
+  --text-primary:   #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+  --input-bg:       #1e2535;
+  --input-border:   #2a3347;
+}
+
+/* ── Global Reset ─────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+/* ── Scrollbar ─────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+:root.dark-mode ::-webkit-scrollbar-thumb { background: #2a3347; }
+:root.dark-mode ::-webkit-scrollbar-thumb:hover { background: #3d4f6e; }

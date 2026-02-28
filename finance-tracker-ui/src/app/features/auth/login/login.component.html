@@ -1,0 +1,117 @@
+<div class="login-page">
+  <!-- Left Panel -->
+  <div class="left-panel">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <span class="brand-name">FinanceTracker</span>
+    </div>
+
+    <div class="panel-content">
+      <h1 class="panel-title">
+        Smart finance<br />
+        for <em>modern</em><br />
+        teams.
+      </h1>
+      <p class="panel-desc">
+        Track expenses, manage invoices and control budgets — all in one place,
+        built for your whole team.
+      </p>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-value">98%</div>
+        <div class="stat-label">Faster approvals</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">3x</div>
+        <div class="stat-label">Less admin work</div>
+      </div>
+      <div class="stat">
+        <div class="stat-value">∞</div>
+        <div class="stat-label">Team members</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel -->
+  <div class="right-panel">
+    <div class="login-box">
+      <div class="login-header">
+        <h2>Welcome back</h2>
+        <p>Sign in to your workspace</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <!-- Error -->
+        @if (errorMessage()) {
+          <div class="error-alert">{{ errorMessage() }}</div>
+        }
+
+        <!-- Email -->
+        <div class="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            formControlName="email"
+            placeholder="you@company.com"
+          />
+          @if (form.get("email")?.invalid && form.get("email")?.touched) {
+            <p class="field-error">Valid email is required</p>
+          }
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            formControlName="password"
+            placeholder="••••••••"
+          />
+          @if (form.get("password")?.invalid && form.get("password")?.touched) {
+            <p class="field-error">Password is required</p>
+          }
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" [disabled]="loading()">
+          @if (loading()) {
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              ></circle>
+              <path
+                class="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              ></path>
+            </svg>
+            Signing in...
+          } @else {
+            Sign in →
+          }
+        </button>
+      </form>
+
+      <p class="register-link">
+        Don't have an account?
+        <a routerLink="/auth/register">Register your company</a>
+      </p>
+    </div>
+  </div>
+</div>

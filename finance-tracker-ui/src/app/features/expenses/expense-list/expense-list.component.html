@@ -1,0 +1,188 @@
+<div class="p-8">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Expenses</h1>
+      <p class="text-gray-500 text-sm mt-1">
+        {{ data()?.totalCount ?? 0 }} total expenses
+      </p>
+    </div>
+    <a
+      routerLink="/expenses/new"
+      class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-2"
+    >
+      <svg
+        class="w-4 h-4"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        />
+      </svg>
+      New Expense
+    </a>
+  </div>
+
+  <!-- Status Filter -->
+  <div class="flex gap-2 mb-6">
+    @for (s of statuses; track s) {
+      <button
+        (click)="filterByStatus(s)"
+        [class.bg-indigo-600]="currentStatus() === s"
+        [class.text-white]="currentStatus() === s"
+        [class.bg-white]="currentStatus() !== s"
+        [class.text-gray-600]="currentStatus() !== s"
+        class="px-4 py-1.5 rounded-full text-sm font-medium border border-gray-200 hover:border-indigo-300 transition"
+      >
+        {{ s || "All" }}
+      </button>
+    }
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    @if (loading()) {
+      <div class="flex items-center justify-center py-20">
+        <svg
+          class="animate-spin h-6 w-6 text-indigo-600"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            class="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          ></path>
+        </svg>
+      </div>
+    } @else {
+      <table class="w-full">
+        <thead class="bg-gray-50 border-b border-gray-200">
+          <tr>
+            <th
+              class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3"
+            >
+              Title
+            </th>
+            <th
+              class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3"
+            >
+              Category
+            </th>
+            <th
+              class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3"
+            >
+              Amount
+            </th>
+            <th
+              class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3"
+            >
+              Date
+            </th>
+            <th
+              class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3"
+            >
+              Status
+            </th>
+            <th
+              class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3"
+            >
+              Submitted By
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          @for (expense of data()?.items; track expense.id) {
+            <tr
+              class="hover:bg-gray-50 transition cursor-pointer"
+              [routerLink]="['/expenses', expense.id]"
+            >
+              <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                {{ expense.title }}
+              </td>
+              <td class="px-6 py-4">
+                <span
+                  class="inline-flex items-center gap-1.5 text-sm text-gray-700"
+                >
+                  <span
+                    class="w-2.5 h-2.5 rounded-full"
+                    [style.background-color]="expense.categoryColor"
+                  ></span>
+                  {{ expense.categoryName }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm font-semibold text-gray-900">
+                {{ expense.amount | currency }}
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                {{ expense.expenseDate | date: "MMM d, y" }}
+              </td>
+              <td class="px-6 py-4">
+                <span
+                  [class]="statusClass(expense.status)"
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                >
+                  {{ expense.status }}
+                </span>
+              </td>
+              <td class="px-6 py-4 text-sm text-gray-500">
+                {{ expense.submittedByName }}
+              </td>
+            </tr>
+          } @empty {
+            <tr>
+              <td colspan="6" class="text-center py-12 text-gray-400 text-sm">
+                No expenses found.
+                <a
+                  routerLink="/expenses/new"
+                  class="text-indigo-600 hover:underline ml-1"
+                  >Create one</a
+                >
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      @if (data() && data()!.totalPages > 1) {
+        <div
+          class="flex items-center justify-between px-6 py-4 border-t border-gray-100"
+        >
+          <p class="text-sm text-gray-500">
+            Page {{ data()!.page }} of {{ data()!.totalPages }}
+          </p>
+          <div class="flex gap-2">
+            <button
+              (click)="changePage(currentPage() - 1)"
+              [disabled]="!data()!.hasPreviousPage"
+              class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition"
+            >
+              Previous
+            </button>
+            <button
+              (click)="changePage(currentPage() + 1)"
+              [disabled]="!data()!.hasNextPage"
+              class="px-3 py-1.5 text-sm border border-gray-200 rounded-lg disabled:opacity-40 hover:bg-gray-50 transition"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>
