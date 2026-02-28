@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{6605C64F-4583-48B1-A929-B53F98018EB4}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FinanceTracker.Domain", "src\FinanceTracker.Domain\FinanceTracker.Domain.csproj", "{FAE3F25B-A3E6-451B-89C2-7BC83D3E02FC}"
 EndProject
@@ -17,9 +20,6 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{FAE3F25B-A3E6-451B-89C2-7BC83D3E02FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -38,6 +38,9 @@ Global
 		{BEC2889B-85C9-4FC7-8E79-CB2F4D68DBE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BEC2889B-85C9-4FC7-8E79-CB2F4D68DBE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BEC2889B-85C9-4FC7-8E79-CB2F4D68DBE8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{FAE3F25B-A3E6-451B-89C2-7BC83D3E02FC} = {6605C64F-4583-48B1-A929-B53F98018EB4}
