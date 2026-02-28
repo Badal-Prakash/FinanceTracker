@@ -25,11 +25,15 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 // CORS for Angular
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll", policy =>
+    options.AddPolicy("AngularApp", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(
+            "http://localhost:4200",                       // local dev
+            "https://finance-tracker-opal-tau.vercel.app"  // Vercel frontend
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
 
