@@ -24,11 +24,14 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 // CORS for Angular
 builder.Services.AddCors(options =>
-    options.AddPolicy("AngularApp", policy =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
         policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials()));
+              .AllowAnyMethod();
+    });
+});
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
