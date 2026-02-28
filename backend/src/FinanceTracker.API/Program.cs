@@ -25,7 +25,7 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 // CORS for Angular
 builder.Services.AddCors(options =>
     options.AddPolicy("AngularApp", policy =>
-        policy.WithOrigins("http://localhost:4200")
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials()));
@@ -90,5 +90,6 @@ app.UseCors("AngularApp");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-
-app.Run();
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+app.Run($"http://0.0.0.0:{port}");
+// app.Run();
