@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <SuppressTfmSupportBuildWarnings>true</SuppressTfmSupportBuildWarnings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations/" />
+    <Folder Include="Persistence/" />
+    <Folder Include="Services/" />
+  </ItemGroup>
+
+  <ItemGroup>
+  <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
+  <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.1">
+    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PrivateAssets>all</PrivateAssets>
+  </PackageReference>
+  <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.1" />
+  <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.1" />
+  <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.1" />
+  <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.4.0" />
+  <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.4.0" />
+  <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.3" />  <!-- ← replaces SqlServer -->
+    
+</ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../FinanceTracker.Application/FinanceTracker.Application.csproj" />
+    <ProjectReference Include="../FinanceTracker.Domain/FinanceTracker.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

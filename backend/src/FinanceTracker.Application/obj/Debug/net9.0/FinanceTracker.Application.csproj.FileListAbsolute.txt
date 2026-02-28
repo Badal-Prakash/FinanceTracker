@@ -1,0 +1,16 @@
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/bin/Debug/net9.0/FinanceTracker.Application.deps.json
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/bin/Debug/net9.0/FinanceTracker.Application.dll
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/bin/Debug/net9.0/FinanceTracker.Application.pdb
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/bin/Debug/net9.0/FinanceTracker.Domain.dll
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/bin/Debug/net9.0/FinanceTracker.Domain.pdb
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/obj/Debug/net9.0/FinanceTracker.Application.csproj.AssemblyReference.cache
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/obj/Debug/net9.0/FinanceTracker.Application.GeneratedMSBuildEditorConfig.editorconfig
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/obj/Debug/net9.0/FinanceTracker.Application.AssemblyInfoInputs.cache
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/obj/Debug/net9.0/FinanceTracker.Application.AssemblyInfo.cs
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/obj/Debug/net9.0/FinanceTracker.Application.csproj.CoreCompileInputs.cache
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/obj/Debug/net9.0/FinanceTracker.Application.sourcelink.json
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/obj/Debug/net9.0/FinanceT.00C3F739.Up2Date
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/obj/Debug/net9.0/FinanceTracker.Application.dll
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/obj/Debug/net9.0/refint/FinanceTracker.Application.dll
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/obj/Debug/net9.0/FinanceTracker.Application.pdb
+/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/obj/Debug/net9.0/ref/FinanceTracker.Application.dll
