@@ -1,7 +1,4 @@
 import { Routes } from '@angular/router';
-import { InvoiceListComponent } from '../invoices/invoice-list/invoice-list.component';
-import { InvoiceFormComponent } from '../invoices/invoice-form/invoice-form.component';
-import { InvoiceDetailComponent } from '../invoices/invoice-detail/invoice-detail.component';
 
 export const SHELL_ROUTES: Routes = [
   {
@@ -45,10 +42,34 @@ export const SHELL_ROUTES: Routes = [
       {
         path: 'invoices',
         children: [
-          { path: '', component: InvoiceListComponent },
-          { path: 'new', component: InvoiceFormComponent },
-          { path: ':id', component: InvoiceDetailComponent },
-          { path: ':id/edit', component: InvoiceFormComponent },
+          {
+            path: '',
+            loadComponent: () =>
+              import('../invoices/invoice-list/invoice-list.component').then(
+                (m) => m.InvoiceListComponent,
+              ),
+          },
+          {
+            path: 'new',
+            loadComponent: () =>
+              import('../invoices/invoice-form/invoice-form.component').then(
+                (m) => m.InvoiceFormComponent,
+              ),
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('../invoices/invoice-detail/invoice-detail.component').then(
+                (m) => m.InvoiceDetailComponent,
+              ),
+          },
+          {
+            path: ':id/edit',
+            loadComponent: () =>
+              import('../invoices/invoice-form/invoice-form.component').then(
+                (m) => m.InvoiceFormComponent,
+              ),
+          },
         ],
       },
     ],
