@@ -10,10 +10,11 @@ public enum ExpenseStatus
 
 public enum InvoiceStatus
 {
-    Unpaid = 0,
-    Paid = 1,
-    Overdue = 2,
-    Cancelled = 3
+    Draft = 0,
+    Unpaid = 1,
+    Paid = 2,
+    Overdue = 3,
+    Cancelled = 4
 }
 
 public enum UserRole

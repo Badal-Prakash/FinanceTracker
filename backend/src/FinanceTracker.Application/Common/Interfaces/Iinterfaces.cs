@@ -12,6 +12,7 @@ public interface IApplicationDbContext
     DbSet<User> Users { get; }
     DbSet<Expense> Expenses { get; }
     DbSet<Invoice> Invoices { get; }
+    DbSet<InvoiceLineItem> InvoiceLineItems { get; }
     DbSet<Budget> Budgets { get; }
     DbSet<Category> Categories { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);

@@ -1,0 +1,246 @@
+<div class="page">
+  <div class="page-header">
+    <a routerLink="/invoices" class="back-btn">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+    </a>
+    <div class="page-header__info">
+      <h1 class="page-header__title">
+        {{ invoice()?.invoiceNumber ?? "Loading..." }}
+      </h1>
+      <p class="page-header__subtitle">Invoice Details</p>
+    </div>
+    @if (
+      invoice() &&
+      invoice()!.status !== "Cancelled" &&
+      invoice()!.status !== "Paid"
+    ) {
+      <a
+        [routerLink]="['/invoices', invoice()!.id, 'edit']"
+        class="btn btn--outline btn--sm"
+        >Edit</a
+      >
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <svg class="spinner" fill="none" viewBox="0 0 24 24">
+        <circle
+          class="spinner__track"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        ></circle>
+        <path
+          class="spinner__fill"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        ></path>
+      </svg>
+    </div>
+  }
+
+  @if (invoice()) {
+    <div [class]="bannerClass(invoice()!.status)">
+      <div class="banner__left">
+        <span [class]="statusClass(invoice()!.status)">{{
+          invoice()!.status
+        }}</span>
+        @if (invoice()!.status === "Paid" && invoice()!.paidAt) {
+          <span class="banner__meta"
+            >Paid on {{ invoice()!.paidAt | date: "MMM d, y" }}</span
+          >
+        }
+        @if (isOverdue(invoice()!)) {
+          <span class="banner__meta banner__meta--danger"
+            >{{ daysOverdue(invoice()!) }} days overdue</span
+          >
+        }
+      </div>
+      <span class="banner__amount">{{ invoice()!.amount | currency }}</span>
+    </div>
+
+    <div class="card">
+      <h2 class="card__title">Client</h2>
+      <div class="detail-grid">
+        <div class="detail-item">
+          <p class="detail-item__label">Name</p>
+          <p class="detail-item__value">{{ invoice()!.clientName }}</p>
+        </div>
+        <div class="detail-item">
+          <p class="detail-item__label">Email</p>
+          <p class="detail-item__value">{{ invoice()!.clientEmail }}</p>
+        </div>
+        <div class="detail-item">
+          <p class="detail-item__label">Due Date</p>
+          <p
+            [class]="
+              isOverdue(invoice()!)
+                ? 'detail-item__value detail-item__value--danger'
+                : 'detail-item__value'
+            "
+          >
+            {{ invoice()!.dueDate | date: "MMM d, y" }}
+          </p>
+        </div>
+        <div class="detail-item">
+          <p class="detail-item__label">Created</p>
+          <p class="detail-item__value">
+            {{ invoice()!.createdAt | date: "MMM d, y" }}
+          </p>
+        </div>
+        @if (invoice()!.clientAddress) {
+          <div class="detail-item detail-item--full">
+            <p class="detail-item__label">Billing Address</p>
+            <p class="detail-item__value">{{ invoice()!.clientAddress }}</p>
+          </div>
+        }
+        @if (invoice()!.notes) {
+          <div class="detail-item detail-item--full">
+            <p class="detail-item__label">Notes</p>
+            <p class="detail-item__value detail-item__value--notes">
+              {{ invoice()!.notes }}
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="card card--no-padding">
+      <div class="card-header">
+        <h2 class="card__title">Line Items</h2>
+      </div>
+      <table class="table">
+        <thead class="table__head">
+          <tr>
+            <th class="table__th">Description</th>
+            <th class="table__th table__th--center">Qty</th>
+            <th class="table__th table__th--right">Unit Price</th>
+            <th class="table__th table__th--right">Total</th>
+          </tr>
+        </thead>
+        <tbody class="table__body">
+          @for (li of invoice()!.lineItems; track li.id) {
+            <tr class="table__row">
+              <td class="table__td">{{ li.description }}</td>
+              <td class="table__td table__td--center">{{ li.quantity }}</td>
+              <td class="table__td table__td--right">
+                {{ li.unitPrice | currency }}
+              </td>
+              <td class="table__td table__td--right">
+                {{ lineTotal(li.quantity, li.unitPrice) | currency }}
+              </td>
+            </tr>
+          }
+        </tbody>
+        <tfoot class="table__foot">
+          <tr>
+            <td colspan="3" class="table__td table__td--total-label">Total</td>
+            <td class="table__td table__td--total-value">
+              {{ invoice()!.amount | currency }}
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    @if (canAct()) {
+      <div class="card">
+        <h2 class="card__title">Actions</h2>
+        <div class="actions">
+          @if (invoice()!.status === "Draft") {
+            <button
+              (click)="sendInvoice()"
+              [disabled]="actionLoading()"
+              class="btn btn--primary"
+            >
+              <svg
+                class="btn__icon"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                />
+              </svg>
+              Send to Client
+            </button>
+          }
+
+          @if (
+            invoice()!.status === "Unpaid" || invoice()!.status === "Overdue"
+          ) {
+            <button
+              (click)="markPaid()"
+              [disabled]="actionLoading()"
+              class="btn btn--success"
+            >
+              <svg
+                class="btn__icon"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
+              Mark as Paid
+            </button>
+          }
+
+          @if (
+            invoice()!.status !== "Paid" && invoice()!.status !== "Cancelled"
+          ) {
+            <button
+              (click)="cancelInvoice()"
+              [disabled]="actionLoading()"
+              class="btn btn--danger-outline"
+            >
+              Cancel Invoice
+            </button>
+          }
+
+          @if (canDelete() && invoice()!.status !== "Paid") {
+            <button
+              (click)="deleteInvoice()"
+              [disabled]="actionLoading()"
+              class="btn btn--ghost btn--delete"
+            >
+              <svg
+                class="btn__icon"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+              Delete
+            </button>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

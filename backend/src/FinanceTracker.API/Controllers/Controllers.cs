@@ -2,6 +2,7 @@ using FinanceTracker.Application.Auth.Commands;
 using FinanceTracker.Application.Categories;
 using FinanceTracker.Application.Dashboard;
 using FinanceTracker.Application.Expenses;
+using FinanceTracker.Application.Invoices;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -130,4 +131,65 @@ public class DashboardController : BaseController
     [HttpGet("stats")]
     public async Task<ActionResult<DashboardStatsDto>> GetStats()
         => Ok(await Mediator.Send(new GetDashboardStatsQuery()));
+}
+
+// ─── Invoices Controller ──────────────────────────────────────────────────────
+[Authorize]
+public class InvoicesController : BaseController
+{
+    [HttpGet]
+    public async Task<ActionResult<PaginatedInvoiceList>> GetList(
+        [FromQuery] GetInvoicesListQuery query)
+        => Ok(await Mediator.Send(query));
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<InvoiceDto>> GetById(Guid id)
+        => Ok(await Mediator.Send(new GetInvoiceByIdQuery(id)));
+
+    [HttpGet("stats")]
+    public async Task<ActionResult<InvoiceStatsDto>> GetStats()
+        => Ok(await Mediator.Send(new GetInvoiceStatsQuery()));
+
+    [HttpPost]
+    public async Task<ActionResult<Guid>> Create(CreateInvoiceCommand command)
+    {
+        var id = await Mediator.Send(command);
+        return CreatedAtAction(nameof(GetById), new { id }, id);
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Update(Guid id, UpdateInvoiceCommand command)
+    {
+        await Mediator.Send(command with { Id = id });
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/send")]
+    public async Task<IActionResult> Send(Guid id)
+    {
+        await Mediator.Send(new SendInvoiceCommand(id));
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/mark-paid")]
+    public async Task<IActionResult> MarkPaid(Guid id)
+    {
+        await Mediator.Send(new MarkInvoicePaidCommand(id));
+        return NoContent();
+    }
+
+    [HttpPost("{id:guid}/cancel")]
+    public async Task<IActionResult> Cancel(Guid id)
+    {
+        await Mediator.Send(new CancelInvoiceCommand(id));
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Manager,Admin,SuperAdmin")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        await Mediator.Send(new DeleteInvoiceCommand(id));
+        return NoContent();
+    }
 }

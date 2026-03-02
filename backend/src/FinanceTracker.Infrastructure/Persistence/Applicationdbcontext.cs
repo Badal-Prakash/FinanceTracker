@@ -21,6 +21,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
     public DbSet<Invoice> Invoices => Set<Invoice>();
     public DbSet<Budget> Budgets => Set<Budget>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<InvoiceLineItem> InvoiceLineItems => Set<InvoiceLineItem>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -99,6 +100,23 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                   .HasForeignKey(b => b.CategoryId)
                   .OnDelete(DeleteBehavior.Restrict);
             entity.HasQueryFilter(b => b.TenantId == _currentUser.TenantId);
+        });
+
+        builder.Entity<InvoiceLineItem>(entity =>
+        {
+            entity.HasKey(li => li.Id);
+            entity.Property(li => li.UnitPrice).HasPrecision(18, 2);
+            entity.HasOne<Invoice>()
+                .WithMany(i => i.LineItems)
+                .HasForeignKey(li => li.InvoiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<Invoice>(entity =>
+        {
+            entity.HasKey(i => i.Id);
+            entity.Property(i => i.Amount).HasPrecision(18, 2);
+            entity.HasQueryFilter(i => i.TenantId == _currentUser.TenantId);
         });
     }
 

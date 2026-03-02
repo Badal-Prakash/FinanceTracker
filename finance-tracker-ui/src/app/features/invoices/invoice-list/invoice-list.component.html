@@ -1,0 +1,226 @@
+<div class="page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="page-header__text">
+      <h1 class="page-header__title">Invoices</h1>
+      <p class="page-header__subtitle">
+        Manage client invoices and track payments
+      </p>
+    </div>
+    <a routerLink="/invoices/new" class="btn btn--primary">
+      <svg
+        class="btn__icon"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        />
+      </svg>
+      New Invoice
+    </a>
+  </div>
+
+  <!-- Stats Cards -->
+  @if (stats()) {
+    <div class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-card__label">Outstanding</p>
+        <p class="stat-card__value">{{ stats()!.totalUnpaid | currency }}</p>
+        <p class="stat-card__sub">{{ stats()!.unpaidCount }} unpaid invoices</p>
+      </div>
+      <div class="stat-card stat-card--danger">
+        <p class="stat-card__label">Overdue</p>
+        <p class="stat-card__value stat-card__value--danger">
+          {{ stats()!.totalOverdue | currency }}
+        </p>
+        <p class="stat-card__sub">
+          {{ stats()!.overdueCount }} invoices overdue
+        </p>
+      </div>
+      <div class="stat-card stat-card--success">
+        <p class="stat-card__label">Paid This Month</p>
+        <p class="stat-card__value stat-card__value--success">
+          {{ stats()!.totalPaidThisMonth | currency }}
+        </p>
+        <p class="stat-card__sub">
+          {{ stats()!.paidThisMonthCount }} invoices paid
+        </p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-card__label">Total Invoices</p>
+        <p class="stat-card__value">{{ totalCount() }}</p>
+        <p class="stat-card__sub">all time</p>
+      </div>
+    </div>
+  }
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <input
+      type="text"
+      [(ngModel)]="filters.clientName"
+      (ngModelChange)="onFilterChange()"
+      placeholder="Search client..."
+      class="filter-input"
+    />
+
+    <select
+      [(ngModel)]="filters.status"
+      (ngModelChange)="onFilterChange()"
+      class="filter-select"
+    >
+      <option value="">All Statuses</option>
+      <option value="Draft">Draft</option>
+      <option value="Unpaid">Unpaid</option>
+      <option value="Paid">Paid</option>
+      <option value="Overdue">Overdue</option>
+      <option value="Cancelled">Cancelled</option>
+    </select>
+
+    <div class="filter-date-group">
+      <label class="filter-date-label">From</label>
+      <input
+        type="date"
+        [(ngModel)]="filters.fromDate"
+        (ngModelChange)="onFilterChange()"
+        class="filter-input filter-input--date"
+      />
+    </div>
+
+    <div class="filter-date-group">
+      <label class="filter-date-label">To</label>
+      <input
+        type="date"
+        [(ngModel)]="filters.toDate"
+        (ngModelChange)="onFilterChange()"
+        class="filter-input filter-input--date"
+      />
+    </div>
+
+    @if (hasActiveFilters()) {
+      <button (click)="clearFilters()" class="btn-clear">Clear filters</button>
+    }
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    @if (loading()) {
+      <div class="table-empty">
+        <svg class="spinner" fill="none" viewBox="0 0 24 24">
+          <circle
+            class="spinner__track"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          ></circle>
+          <path
+            class="spinner__fill"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          ></path>
+        </svg>
+      </div>
+    } @else if (invoices().length === 0) {
+      <div class="table-empty">
+        <svg
+          class="table-empty__icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+        <p class="table-empty__text">No invoices found</p>
+        <a routerLink="/invoices/new" class="table-empty__link"
+          >Create your first invoice</a
+        >
+      </div>
+    } @else {
+      <table class="table">
+        <thead class="table__head">
+          <tr>
+            <th class="table__th">Invoice #</th>
+            <th class="table__th">Client</th>
+            <th class="table__th">Amount</th>
+            <th class="table__th">Due Date</th>
+            <th class="table__th">Status</th>
+            <th class="table__th table__th--right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="table__body">
+          @for (inv of invoices(); track inv.id) {
+            <tr class="table__row">
+              <td class="table__td">
+                <span class="invoice-number">{{ inv.invoiceNumber }}</span>
+              </td>
+              <td class="table__td">
+                <span class="client-name">{{ inv.clientName }}</span>
+              </td>
+              <td class="table__td">
+                <span class="amount">{{ inv.amount | currency }}</span>
+              </td>
+              <td class="table__td">
+                <span
+                  [class]="
+                    isOverdue(inv) ? 'due-date due-date--overdue' : 'due-date'
+                  "
+                >
+                  {{ inv.dueDate | date: "MMM d, y" }}
+                </span>
+              </td>
+              <td class="table__td">
+                <span [class]="statusClass(inv.status)">{{ inv.status }}</span>
+              </td>
+              <td class="table__td table__td--right">
+                <a [routerLink]="['/invoices', inv.id]" class="action-link"
+                  >View</a
+                >
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <p class="pagination__info">
+            Showing {{ paginationStart() }}–{{ paginationEnd() }} of
+            {{ totalCount() }}
+          </p>
+          <div class="pagination__controls">
+            <button
+              (click)="changePage(currentPage() - 1)"
+              [disabled]="currentPage() === 1"
+              class="pagination__btn"
+            >
+              Previous
+            </button>
+            <span class="pagination__current"
+              >{{ currentPage() }} / {{ totalPages() }}</span
+            >
+            <button
+              (click)="changePage(currentPage() + 1)"
+              [disabled]="currentPage() === totalPages()"
+              class="pagination__btn"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

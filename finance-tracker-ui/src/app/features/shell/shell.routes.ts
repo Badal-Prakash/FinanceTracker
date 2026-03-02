@@ -1,4 +1,7 @@
 import { Routes } from '@angular/router';
+import { InvoiceListComponent } from '../invoices/invoice-list/invoice-list.component';
+import { InvoiceFormComponent } from '../invoices/invoice-form/invoice-form.component';
+import { InvoiceDetailComponent } from '../invoices/invoice-detail/invoice-detail.component';
 
 export const SHELL_ROUTES: Routes = [
   {
@@ -38,6 +41,15 @@ export const SHELL_ROUTES: Routes = [
           import('../expenses/expense-detail/expense-detail.component').then(
             (m) => m.ExpenseDetailComponent,
           ),
+      },
+      {
+        path: 'invoices',
+        children: [
+          { path: '', component: InvoiceListComponent },
+          { path: 'new', component: InvoiceFormComponent },
+          { path: ':id', component: InvoiceDetailComponent },
+          { path: ':id/edit', component: InvoiceFormComponent },
+        ],
       },
     ],
   },

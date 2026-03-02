@@ -239,6 +239,33 @@ namespace FinanceTracker.Infrastructure.Migrations
                     b.ToTable("Invoices");
                 });
 
+            modelBuilder.Entity("FinanceTracker.Domain.Entities.InvoiceLineItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("InvoiceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceId");
+
+                    b.ToTable("InvoiceLineItems");
+                });
+
             modelBuilder.Entity("FinanceTracker.Domain.Entities.Tenant", b =>
                 {
                     b.Property<Guid>("Id")
@@ -381,6 +408,20 @@ namespace FinanceTracker.Infrastructure.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("SubmittedBy");
+                });
+
+            modelBuilder.Entity("FinanceTracker.Domain.Entities.InvoiceLineItem", b =>
+                {
+                    b.HasOne("FinanceTracker.Domain.Entities.Invoice", null)
+                        .WithMany("LineItems")
+                        .HasForeignKey("InvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("FinanceTracker.Domain.Entities.Invoice", b =>
+                {
+                    b.Navigation("LineItems");
                 });
 #pragma warning restore 612, 618
         }
