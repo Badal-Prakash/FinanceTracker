@@ -6,9 +6,12 @@ using FinanceTracker.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 // ─── Services ────────────────────────────────────────────────────────────────
 builder.Services.AddControllers();
@@ -36,7 +39,6 @@ builder.Services.AddCors(options =>
         .AllowCredentials();
     });
 });
-
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -1,16 +1,16 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { ExpenseService } from '../../../core/services/expense.service';
 import {
-  ExpenseService,
   ExpenseListItem,
   PaginatedList,
-} from '../../../core/services/expense.service';
+} from '../../../core/models/expense.model';
 
 @Component({
   selector: 'app-expense-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, CurrencyPipe, DatePipe, RouterLink],
   templateUrl: './expense-list.component.html',
   styleUrl: './expense-list.component.scss',
 })
@@ -58,11 +58,11 @@ export class ExpenseListComponent implements OnInit {
 
   statusClass(status: string): string {
     const map: Record<string, string> = {
-      Draft: 'bg-gray-100 text-gray-700',
-      Submitted: 'bg-yellow-100 text-yellow-700',
-      Approved: 'bg-green-100 text-green-700',
-      Rejected: 'bg-red-100 text-red-700',
+      Draft: 'status-draft',
+      Submitted: 'status-submitted',
+      Approved: 'status-approved',
+      Rejected: 'status-rejected',
     };
-    return map[status] ?? 'bg-gray-100 text-gray-700';
+    return map[status] ?? 'status-draft';
   }
 }

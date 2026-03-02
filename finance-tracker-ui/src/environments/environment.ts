@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://financetracker-h8x6.onrender.com/api',
+  apiUrl: 'http://localhost:5285/api',
 };

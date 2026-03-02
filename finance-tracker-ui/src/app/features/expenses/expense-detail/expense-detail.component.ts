@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, Signal } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import {
@@ -30,9 +30,8 @@ export class ExpenseDetailComponent implements OnInit {
   actionLoading = signal(false);
   showRejectForm = signal(false);
 
-  // ✅ declare types only — initialize in constructor
   rejectReasonControl!: FormControl;
-  canApprove!: ReturnType<AuthService['isManager']['call']>;
+  canApprove!: Signal<boolean>; // ✅ explicit Signal<boolean> type
 
   constructor(
     private route: ActivatedRoute,
@@ -41,9 +40,8 @@ export class ExpenseDetailComponent implements OnInit {
     private authService: AuthService,
     private fb: FormBuilder,
   ) {
-    // ✅ both initialized here so all dependencies are ready
     this.rejectReasonControl = this.fb.control('', Validators.required);
-    this.canApprove = this.authService.isManager;
+    this.canApprove = this.authService.isManager; // ✅ isManager is Signal<boolean>
   }
 
   ngOnInit() {
@@ -86,21 +84,21 @@ export class ExpenseDetailComponent implements OnInit {
 
   statusBannerClass(status: string): string {
     const map: Record<string, string> = {
-      Draft: 'bg-gray-50 text-gray-700',
-      Submitted: 'bg-yellow-50 text-yellow-700',
-      Approved: 'bg-green-50 text-green-700',
-      Rejected: 'bg-red-50 text-red-700',
+      Draft: 'banner-draft',
+      Submitted: 'banner-submitted',
+      Approved: 'banner-approved',
+      Rejected: 'banner-rejected',
     };
-    return map[status] ?? 'bg-gray-50 text-gray-700';
+    return map[status] ?? 'banner-draft';
   }
 
   statusIconClass(status: string): string {
     const map: Record<string, string> = {
-      Draft: 'bg-gray-200 text-gray-600',
-      Submitted: 'bg-yellow-200 text-yellow-700',
-      Approved: 'bg-green-200 text-green-700',
-      Rejected: 'bg-red-200 text-red-700',
+      Draft: 'icon-draft',
+      Submitted: 'icon-submitted',
+      Approved: 'icon-approved',
+      Rejected: 'icon-rejected',
     };
-    return map[status] ?? 'bg-gray-200 text-gray-600';
+    return map[status] ?? 'icon-draft';
   }
 }

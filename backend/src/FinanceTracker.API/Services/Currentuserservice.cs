@@ -17,7 +17,9 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var id = User?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+            // ASP.NET Core JWT middleware maps "sub" → ClaimTypes.NameIdentifier
+            var id = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                   ?? User?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             return Guid.TryParse(id, out var guid) ? guid : Guid.Empty;
         }
     }
@@ -31,7 +33,9 @@ public class CurrentUserService : ICurrentUserService
         }
     }
 
-    public string Email => User?.FindFirst(JwtRegisteredClaimNames.Email)?.Value ?? string.Empty;
+    public string Email => User?.FindFirst(JwtRegisteredClaimNames.Email)?.Value
+                        ?? User?.FindFirst(ClaimTypes.Email)?.Value
+                        ?? string.Empty;
 
     public string Role => User?.FindFirst(ClaimTypes.Role)?.Value ?? string.Empty;
 

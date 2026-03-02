@@ -85,14 +85,19 @@ public class RegisterTenantCommandHandler : IRequestHandler<RegisterTenantComman
             tenant.Id,
             UserRole.Admin);
 
-        // Default categories
+        // Default categories — seeded for every new tenant
         var defaultCategories = new[]
         {
-            Category.Create("Travel", tenant.Id, "#3b82f6", "airplane"),
-            Category.Create("Food & Dining", tenant.Id, "#f59e0b", "utensils"),
+            Category.Create("Travel",           tenant.Id, "#3b82f6", "airplane"),
+            Category.Create("Food & Dining",    tenant.Id, "#f59e0b", "utensils"),
             Category.Create("Software & Tools", tenant.Id, "#8b5cf6", "computer"),
-            Category.Create("Office Supplies", tenant.Id, "#10b981", "briefcase"),
-            Category.Create("Marketing", tenant.Id, "#ef4444", "megaphone"),
+            Category.Create("Office Supplies",  tenant.Id, "#10b981", "briefcase"),
+            Category.Create("Marketing",        tenant.Id, "#ef4444", "megaphone"),
+            Category.Create("Training",         tenant.Id, "#06b6d4", "book"),
+            Category.Create("Entertainment",    tenant.Id, "#ec4899", "music"),
+            Category.Create("Utilities",        tenant.Id, "#64748b", "bolt"),
+            Category.Create("Healthcare",       tenant.Id, "#22c55e", "heart"),
+            Category.Create("Other",            tenant.Id, "#94a3b8", "folder"),
         };
 
         _context.Tenants.Add(tenant);

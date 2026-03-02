@@ -1,5 +1,6 @@
 using FinanceTracker.Application.Auth.Commands;
 using FinanceTracker.Application.Categories;
+using FinanceTracker.Application.Dashboard;
 using FinanceTracker.Application.Expenses;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -68,9 +69,9 @@ public class ExpensesController : BaseController
 
     [HttpPost("{id:guid}/reject")]
     [Authorize(Roles = "Manager,Admin,SuperAdmin")]
-    public async Task<IActionResult> Reject(Guid id, [FromBody] RejectExpenseCommand command)
+    public async Task<IActionResult> Reject(Guid id, [FromBody] RejectExpenseBody body)
     {
-        await Mediator.Send(command with { ExpenseId = id });
+        await Mediator.Send(new RejectExpenseCommand(id, body.Reason));
         return NoContent();
     }
 
@@ -82,11 +83,51 @@ public class ExpensesController : BaseController
     }
 }
 
-// catogery controller
+// Body record for reject (decouples route id from command)
+public record RejectExpenseBody(string Reason);
+
+// ─── Categories Controller ────────────────────────────────────────────────────
 [Authorize]
 public class CategoriesController : BaseController
 {
     [HttpGet]
     public async Task<ActionResult<List<CategoryDto>>> GetAll()
         => Ok(await Mediator.Send(new GetCategoriesQuery()));
+
+    [HttpGet("{id:guid}")]
+    public async Task<ActionResult<CategoryDto>> GetById(Guid id)
+        => Ok(await Mediator.Send(new GetCategoryByIdQuery(id)));
+
+    [HttpPost]
+    [Authorize(Roles = "Admin,SuperAdmin")]
+    public async Task<ActionResult<Guid>> Create(CreateCategoryCommand command)
+    {
+        var id = await Mediator.Send(command);
+        return CreatedAtAction(nameof(GetById), new { id }, id);
+    }
+
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
+    public async Task<IActionResult> Update(Guid id, UpdateCategoryCommand command)
+    {
+        await Mediator.Send(command with { Id = id });
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Admin,SuperAdmin")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        await Mediator.Send(new DeleteCategoryCommand(id));
+        return NoContent();
+    }
+}
+
+// ─── Dashboard Controller ─────────────────────────────────────────────────────
+[Authorize]
+public class DashboardController : BaseController
+{
+    [HttpGet("stats")]
+    public async Task<ActionResult<DashboardStatsDto>> GetStats()
+        => Ok(await Mediator.Send(new GetDashboardStatsQuery()));
 }

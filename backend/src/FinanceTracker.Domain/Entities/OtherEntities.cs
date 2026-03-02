@@ -32,6 +32,9 @@ public class Category : BaseEntity
         Color = color;
         Icon = icon;
     }
+
+    public void Deactivate() => IsActive = false;
+    public void Activate() => IsActive = true;
 }
 
 // ─── Invoice ─────────────────────────────────────────────────────────────────

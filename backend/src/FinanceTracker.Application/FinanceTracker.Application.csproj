@@ -15,6 +15,7 @@
     <Folder Include="Common/Exceptions/" />
     <Folder Include="Common/Exceptions/Behaviours/" />
     <Folder Include="Common/Interfaces/" />
+    <Folder Include="Dashboard/" />
     <Folder Include="Expenses/" />
   </ItemGroup>
 
