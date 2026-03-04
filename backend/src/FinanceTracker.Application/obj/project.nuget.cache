@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "WLU/OMYXiDM=",
+  "dgSpecHash": "IrWJXmDa3Sg=",
   "success": true,
   "projectFilePath": "/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Application/FinanceTracker.Application.csproj",
   "expectedPackageFiles": [
@@ -9,6 +9,10 @@
     "/Users/badal/.nuget/packages/fluentvalidation.dependencyinjectionextensions/11.9.2/fluentvalidation.dependencyinjectionextensions.11.9.2.nupkg.sha512",
     "/Users/badal/.nuget/packages/mediatr/12.0.0/mediatr.12.0.0.nupkg.sha512",
     "/Users/badal/.nuget/packages/mediatr.contracts/2.0.0/mediatr.contracts.2.0.0.nupkg.sha512",
+    "/Users/badal/.nuget/packages/microsoft.aspnetcore.http/2.3.9/microsoft.aspnetcore.http.2.3.9.nupkg.sha512",
+    "/Users/badal/.nuget/packages/microsoft.aspnetcore.http.abstractions/2.3.0/microsoft.aspnetcore.http.abstractions.2.3.0.nupkg.sha512",
+    "/Users/badal/.nuget/packages/microsoft.aspnetcore.http.features/2.3.0/microsoft.aspnetcore.http.features.2.3.0.nupkg.sha512",
+    "/Users/badal/.nuget/packages/microsoft.aspnetcore.webutilities/2.3.0/microsoft.aspnetcore.webutilities.2.3.0.nupkg.sha512",
     "/Users/badal/.nuget/packages/microsoft.bcl.asyncinterfaces/7.0.0/microsoft.bcl.asyncinterfaces.7.0.0.nupkg.sha512",
     "/Users/badal/.nuget/packages/microsoft.entityframeworkcore/9.0.1/microsoft.entityframeworkcore.9.0.1.nupkg.sha512",
     "/Users/badal/.nuget/packages/microsoft.entityframeworkcore.abstractions/9.0.1/microsoft.entityframeworkcore.abstractions.9.0.1.nupkg.sha512",
@@ -21,10 +25,14 @@
     "/Users/badal/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/9.0.1/microsoft.extensions.dependencyinjection.abstractions.9.0.1.nupkg.sha512",
     "/Users/badal/.nuget/packages/microsoft.extensions.logging/9.0.1/microsoft.extensions.logging.9.0.1.nupkg.sha512",
     "/Users/badal/.nuget/packages/microsoft.extensions.logging.abstractions/9.0.1/microsoft.extensions.logging.abstractions.9.0.1.nupkg.sha512",
+    "/Users/badal/.nuget/packages/microsoft.extensions.objectpool/8.0.11/microsoft.extensions.objectpool.8.0.11.nupkg.sha512",
     "/Users/badal/.nuget/packages/microsoft.extensions.options/9.0.1/microsoft.extensions.options.9.0.1.nupkg.sha512",
     "/Users/badal/.nuget/packages/microsoft.extensions.primitives/9.0.1/microsoft.extensions.primitives.9.0.1.nupkg.sha512",
+    "/Users/badal/.nuget/packages/microsoft.net.http.headers/2.3.8/microsoft.net.http.headers.2.3.8.nupkg.sha512",
     "/Users/badal/.nuget/packages/npgsql/7.0.7/npgsql.7.0.7.nupkg.sha512",
-    "/Users/badal/.nuget/packages/npgsql.entityframeworkcore.postgresql/7.0.18/npgsql.entityframeworkcore.postgresql.7.0.18.nupkg.sha512"
+    "/Users/badal/.nuget/packages/npgsql.entityframeworkcore.postgresql/7.0.18/npgsql.entityframeworkcore.postgresql.7.0.18.nupkg.sha512",
+    "/Users/badal/.nuget/packages/system.buffers/4.6.0/system.buffers.4.6.0.nupkg.sha512",
+    "/Users/badal/.nuget/packages/system.text.encodings.web/8.0.0/system.text.encodings.web.8.0.0.nupkg.sha512"
   ],
   "logs": [
     {

@@ -10,7 +10,9 @@ import {
 import { ExpenseService } from '../../../core/services/expense.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ExpenseDetail } from '../../../core/models/expense.model';
-
+import { ReceiptUploadComponent } from '../../Receipt/receipt-upload/receipt-upload.component';
+import { ReceiptService } from '../../../core/services/receipt.service';
+import { ReceiptState } from '../../../features/Receipt/receipt-upload/receipt-upload.component';
 @Component({
   selector: 'app-expense-detail',
   standalone: true,
@@ -20,6 +22,7 @@ import { ExpenseDetail } from '../../../core/models/expense.model';
     DatePipe,
     RouterLink,
     ReactiveFormsModule,
+    ReceiptUploadComponent,
   ],
   templateUrl: './expense-detail.component.html',
   styleUrl: './expense-detail.component.scss',
@@ -39,6 +42,7 @@ export class ExpenseDetailComponent implements OnInit {
     private expenseService: ExpenseService,
     private authService: AuthService,
     private fb: FormBuilder,
+    private receiptService: ReceiptService,
   ) {
     this.rejectReasonControl = this.fb.control('', Validators.required);
     this.canApprove = this.authService.isManager; // ✅ isManager is Signal<boolean>
@@ -100,5 +104,25 @@ export class ExpenseDetailComponent implements OnInit {
       Rejected: 'icon-rejected',
     };
     return map[status] ?? 'icon-draft';
+  }
+
+  onReceiptUploaded(receiptState: ReceiptState): void {
+    // Update the expense with the new receipt URL
+    if (this.expense() && receiptState.url) {
+      this.expense.update((current) => ({
+        ...current!,
+        receiptUrl: receiptState.url ?? undefined,
+      }));
+    }
+  }
+
+  onReceiptRemoved(): void {
+    // Clear the receipt URL from the expense
+    if (this.expense()) {
+      this.expense.update((current) => ({
+        ...current!,
+        receiptUrl: undefined,
+      }));
+    }
   }
 }

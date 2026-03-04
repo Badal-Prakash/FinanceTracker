@@ -72,6 +72,58 @@ export const SHELL_ROUTES: Routes = [
           },
         ],
       },
+      {
+        path: 'budgets',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('../Budgets/budget-overview/budget-overview.component').then(
+                (m) => m.BudgetOverviewComponent,
+              ),
+          },
+          {
+            path: 'set',
+            loadComponent: () =>
+              import('../Budgets/budget-form/budget-form.component').then(
+                (m) => m.BudgetFormComponent,
+              ),
+          },
+        ],
+      },
+      {
+        path: 'users',
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('../users/user-list/user-list.component').then(
+                (m) => m.UserListComponent,
+              ),
+          },
+          {
+            path: 'invite',
+            loadComponent: () =>
+              import('../users/invite-user/invite-user.component').then(
+                (m) => m.InviteUserComponent,
+              ),
+          },
+        ],
+      },
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('../users/user-profile/user-profile.component').then(
+            (m) => m.UserProfileComponent,
+          ),
+      },
+      {
+        path: 'reports',
+        loadComponent: () =>
+          import('../reports/reports.component').then(
+            (m) => m.ReportsComponent,
+          ),
+      },
     ],
   },
 ];

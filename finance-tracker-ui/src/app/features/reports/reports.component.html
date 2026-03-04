@@ -1,0 +1,362 @@
+<!-- ── Screen view ──────────────────────────────────────────────────────────── -->
+<div class="page no-print">
+  <div class="page-header">
+    <div>
+      <h1 class="page-header__title">Reports & Exports</h1>
+      <p class="page-header__subtitle">
+        Export data as CSV or generate a printable PDF report
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Expense Report ────────────────────────────────────────────────────── -->
+  <div class="report-card">
+    <div class="report-card__header">
+      <div class="report-card__icon report-card__icon--indigo">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+          />
+        </svg>
+      </div>
+      <div>
+        <h2 class="report-card__title">Expense Report</h2>
+        <p class="report-card__desc">
+          Filter, preview, export as CSV or print to PDF
+        </p>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label class="filter-label">From Date</label>
+        <input
+          type="date"
+          [(ngModel)]="expenseFilters.fromDate"
+          class="filter-input"
+        />
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">To Date</label>
+        <input
+          type="date"
+          [(ngModel)]="expenseFilters.toDate"
+          class="filter-input"
+        />
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Status</label>
+        <select [(ngModel)]="expenseFilters.status" class="filter-select">
+          <option value="">All Statuses</option>
+          @for (s of statuses; track s) {
+            <option [value]="s">{{ s }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Category</label>
+        <select [(ngModel)]="expenseFilters.categoryId" class="filter-select">
+          <option value="">All Categories</option>
+          @for (cat of categories(); track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="export-actions">
+      <button
+        (click)="loadPreview()"
+        [disabled]="previewState() === 'loading'"
+        class="export-btn export-btn--outline"
+      >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+          />
+        </svg>
+        {{ previewState() === "loading" ? "Loading..." : "Preview Report" }}
+      </button>
+
+      <button
+        (click)="printReport()"
+        [disabled]="pdfState() === 'loading'"
+        class="export-btn export-btn--pdf"
+      >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+          />
+        </svg>
+        Print / Save PDF
+      </button>
+
+      <button
+        (click)="exportExpensesCsv()"
+        [disabled]="csvState() === 'loading'"
+        class="export-btn export-btn--csv"
+      >
+        @if (csvState() === "loading") {
+          <svg class="spinner" fill="none" viewBox="0 0 24 24">
+            <circle
+              class="spinner__track"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="spinner__fill"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
+          </svg>
+          Exporting...
+        } @else if (csvState() === "done") {
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          Downloaded!
+        } @else {
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          Export CSV
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Budget Export ──────────────────────────────────────────────────────── -->
+  <div class="report-card">
+    <div class="report-card__header">
+      <div class="report-card__icon report-card__icon--green">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
+        </svg>
+      </div>
+      <div>
+        <h2 class="report-card__title">Budget vs Actual</h2>
+        <p class="report-card__desc">
+          Export monthly budget with actual spend per category
+        </p>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label class="filter-label">Month</label>
+        <select [(ngModel)]="budgetMonth" class="filter-select">
+          @for (m of months; track m.value) {
+            <option [value]="m.value">{{ m.label }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label class="filter-label">Year</label>
+        <select [(ngModel)]="budgetYear" class="filter-select">
+          @for (y of years; track y) {
+            <option [value]="y">{{ y }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="export-actions">
+      <button
+        (click)="exportBudgetCsv()"
+        [disabled]="budgetState() === 'loading'"
+        class="export-btn export-btn--csv"
+      >
+        @if (budgetState() === "loading") {
+          <svg class="spinner" fill="none" viewBox="0 0 24 24">
+            <circle
+              class="spinner__track"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              stroke-width="4"
+            />
+            <path
+              class="spinner__fill"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+            />
+          </svg>
+          Exporting...
+        } @else if (budgetState() === "done") {
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 13l4 4L19 7"
+            />
+          </svg>
+          Downloaded!
+        } @else {
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+          </svg>
+          Export CSV
+        }
+      </button>
+    </div>
+    <p class="export-hint">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+      Exports: Category, Budgeted, Spent, Remaining, Utilisation % for
+      {{ monthLabel(budgetMonth) }} {{ budgetYear }}.
+    </p>
+  </div>
+</div>
+
+<!-- ── Print preview (visible on screen + in print) ─────────────────────────── -->
+@if (showPreview() && reportData()) {
+  <div class="print-report">
+    <!-- Close button (screen only) -->
+    <button (click)="closePreview()" class="close-btn no-print">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M6 18L18 6M6 6l12 12"
+        />
+      </svg>
+      Close Preview
+    </button>
+
+    <h1 class="print-title">Expense Report</h1>
+    <p class="print-meta">
+      Period: {{ expenseFilters.fromDate }} –
+      {{ expenseFilters.toDate }} &nbsp;|&nbsp; Generated:
+      {{ today() }} &nbsp;|&nbsp; {{ reportData()!.totalCount }} expenses
+    </p>
+
+    <!-- Summary cards -->
+    <div class="print-summary">
+      <div class="print-card">
+        <p class="print-card__label">Total Expenses</p>
+        <p class="print-card__value">{{ reportData()!.totalCount }}</p>
+      </div>
+      <div class="print-card">
+        <p class="print-card__label">Total Amount</p>
+        <p class="print-card__value">
+          {{ reportData()!.totalAmount | currency }}
+        </p>
+      </div>
+      <div class="print-card">
+        <p class="print-card__label">Approved</p>
+        <p class="print-card__value">{{ reportData()!.approvedCount }}</p>
+      </div>
+      <div class="print-card">
+        <p class="print-card__label">Pending</p>
+        <p class="print-card__value">{{ reportData()!.pendingCount }}</p>
+      </div>
+    </div>
+
+    <!-- Category summary -->
+    <h2 class="print-section-title">By Category</h2>
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th class="right">Total</th>
+          <th>Count</th>
+          <th>Share</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of reportData()!.categorySummary; track c.categoryName) {
+          <tr>
+            <td>{{ c.categoryName }}</td>
+            <td class="right">{{ c.totalAmount | currency }}</td>
+            <td>{{ c.count }}</td>
+            <td>
+              {{ c.percentage | number: "1.0-1" }}%
+              <div class="cat-bar">
+                <div
+                  class="cat-bar__fill"
+                  [style.width]="barWidth(c.percentage)"
+                ></div>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <!-- Expense rows -->
+    <h2 class="print-section-title">Expense Detail</h2>
+    <table class="print-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Submitted By</th>
+          <th>Category</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th class="right">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (r of reportData()!.rows; track $index) {
+          <tr>
+            <td>{{ r.title }}</td>
+            <td>{{ r.submittedBy }}</td>
+            <td>{{ r.category }}</td>
+            <td>{{ r.expenseDate | date: "MMM d, y" }}</td>
+            <td>
+              <span [class]="statusClass(r.status)">{{ r.status }}</span>
+            </td>
+            <td class="right">{{ r.amount | currency }}</td>
+          </tr>
+        }
+        <tr class="total-row">
+          <td colspan="5"><strong>Total</strong></td>
+          <td class="right">
+            <strong>{{ reportData()!.totalAmount | currency }}</strong>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+}

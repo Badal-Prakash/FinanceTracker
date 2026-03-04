@@ -112,6 +112,14 @@
         }
       </div>
     </div>
+    <app-receipt-upload
+      [expenseId]="expense()!.id"
+      [existingUrl]="expense()?.receiptUrl ?? null"
+      [disabled]="expense()?.status === 'Approved'"
+      (uploaded)="onReceiptUploaded($event)"
+      (removed)="onReceiptRemoved()"
+    >
+    </app-receipt-upload>
 
     <!-- Details Card -->
     <div class="detail-card">

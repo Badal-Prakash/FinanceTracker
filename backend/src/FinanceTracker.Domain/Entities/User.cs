@@ -48,4 +48,14 @@ public class User : BaseEntity
 
     public void ChangeRole(UserRole newRole) => Role = newRole;
     public void Deactivate() => IsActive = false;
+    public void Activate() => IsActive = true;
+
+    public void UpdateProfile(string firstName, string lastName)
+    {
+        FirstName = firstName;
+        LastName = lastName;
+    }
+
+    public void ChangePassword(string newPasswordHash)
+        => PasswordHash = newPasswordHash;
 }

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://your-api-url.com/api', // ← update this when deploying
+  apiUrl: 'https://financetracker-h8x6.onrender.com/api',
 };

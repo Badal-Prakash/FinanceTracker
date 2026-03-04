@@ -10,6 +10,7 @@
   <ItemGroup>
     <Folder Include="Auth/" />
     <Folder Include="Auth/Commands/" />
+    <Folder Include="Budgets/" />
     <Folder Include="Categories/" />
     <Folder Include="Common/" />
     <Folder Include="Common/Exceptions/" />
@@ -17,12 +18,16 @@
     <Folder Include="Common/Interfaces/" />
     <Folder Include="Dashboard/" />
     <Folder Include="Expenses/" />
+    <Folder Include="Receipts/" />
+    <Folder Include="Reports/" />
+    <Folder Include="Users/" />
   </ItemGroup>
 
   <ItemGroup>
   <PackageReference Include="MediatR" Version="12.0.0" />
   <PackageReference Include="FluentValidation" Version="11.9.2" />
   <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.2" />
+  <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.3.9" />
   <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
   <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
   <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />

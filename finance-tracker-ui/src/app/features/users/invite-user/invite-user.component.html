@@ -1,0 +1,205 @@
+<div class="page">
+  <div class="page-header">
+    <a routerLink="/users" class="back-btn">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+    </a>
+    <div>
+      <h1 class="page-header__title">Invite Team Member</h1>
+      <p class="page-header__subtitle">Add a new member to your organisation</p>
+    </div>
+  </div>
+
+  <div class="card">
+    @if (error()) {
+      <div class="alert alert--error">{{ error() }}</div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form" novalidate>
+      <!-- Name row -->
+      <div class="form-grid">
+        <div class="form-field">
+          <label class="form-label">First Name *</label>
+          <input
+            type="text"
+            formControlName="firstName"
+            class="form-input"
+            placeholder="Jane"
+          />
+          @if (fieldError("firstName")) {
+            <p class="form-error">{{ fieldError("firstName") }}</p>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label">Last Name *</label>
+          <input
+            type="text"
+            formControlName="lastName"
+            class="form-input"
+            placeholder="Smith"
+          />
+          @if (fieldError("lastName")) {
+            <p class="form-error">{{ fieldError("lastName") }}</p>
+          }
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-field">
+        <label class="form-label">Email Address *</label>
+        <input
+          type="email"
+          formControlName="email"
+          class="form-input"
+          placeholder="jane@company.com"
+        />
+        @if (fieldError("email")) {
+          <p class="form-error">{{ fieldError("email") }}</p>
+        }
+      </div>
+
+      <!-- Role -->
+      <div class="form-field">
+        <label class="form-label">Role *</label>
+        <div class="role-cards">
+          @for (r of roles; track r) {
+            <label
+              class="role-card"
+              [class.role-card--selected]="form.get('role')?.value === r"
+            >
+              <input
+                type="radio"
+                formControlName="role"
+                [value]="r"
+                class="role-card__radio"
+              />
+              <div class="role-card__content">
+                <span class="role-card__name">{{ roleLabels[r] }}</span>
+                <span class="role-card__desc">
+                  @switch (r) {
+                    @case ("Employee") {
+                      View and submit expenses
+                    }
+                    @case ("Manager") {
+                      Approve expenses and set budgets
+                    }
+                    @case ("Admin") {
+                      Full access except billing
+                    }
+                  }
+                </span>
+              </div>
+              <svg
+                class="role-card__check"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </label>
+          }
+        </div>
+      </div>
+
+      <!-- Temporary Password -->
+      <div class="form-field">
+        <label class="form-label">Temporary Password *</label>
+        <div class="input-password">
+          <input
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="temporaryPassword"
+            class="form-input form-input--password"
+            placeholder="Min 8 chars, 1 uppercase, 1 number"
+          />
+          <button
+            type="button"
+            (click)="showPassword.set(!showPassword())"
+            class="input-password__toggle"
+          >
+            @if (showPassword()) {
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                />
+              </svg>
+            } @else {
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            }
+          </button>
+        </div>
+        @if (fieldError("temporaryPassword")) {
+          <p class="form-error">{{ fieldError("temporaryPassword") }}</p>
+        }
+        <p class="form-hint">
+          Share this password with the invitee. They can change it from their
+          profile.
+        </p>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <a routerLink="/users" class="btn btn--secondary">Cancel</a>
+        <button type="submit" [disabled]="loading()" class="btn btn--primary">
+          @if (loading()) {
+            <svg class="spinner" fill="none" viewBox="0 0 24 24">
+              <circle
+                class="spinner__track"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+              />
+              <path
+                class="spinner__fill"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          } @else {
+            <svg
+              class="btn__icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+              />
+            </svg>
+          }
+          Send Invite
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

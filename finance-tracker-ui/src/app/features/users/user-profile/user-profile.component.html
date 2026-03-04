@@ -1,0 +1,260 @@
+<div class="page">
+  <div class="page-header">
+    <h1 class="page-header__title">My Profile</h1>
+    <p class="page-header__subtitle">
+      Manage your personal details and password
+    </p>
+  </div>
+
+  @if (loadingProfile()) {
+    <div class="loading-state">
+      <svg class="spinner" fill="none" viewBox="0 0 24 24">
+        <circle
+          class="spinner__track"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        />
+        <path
+          class="spinner__fill"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        />
+      </svg>
+    </div>
+  }
+
+  @if (!loadingProfile() && user()) {
+    <!-- Profile Header -->
+    <div class="profile-header card">
+      <div class="profile-avatar">{{ initials() }}</div>
+      <div class="profile-header__info">
+        <p class="profile-header__name">{{ user()!.fullName }}</p>
+        <p class="profile-header__email">{{ user()!.email }}</p>
+        <span class="role-badge role-badge--{{ user()!.role.toLowerCase() }}">
+          {{ roleLabels[user()!.role] }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Edit Profile -->
+    <div class="card">
+      <h2 class="card__title">Personal Details</h2>
+
+      @if (profileError()) {
+        <div class="alert alert--error">{{ profileError() }}</div>
+      }
+      @if (profileSuccess()) {
+        <div class="alert alert--success">{{ profileSuccess() }}</div>
+      }
+
+      <form
+        [formGroup]="profileForm"
+        (ngSubmit)="onSaveProfile()"
+        class="form"
+        novalidate
+      >
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="form-label">First Name *</label>
+            <input type="text" formControlName="firstName" class="form-input" />
+            @if (fieldError(profileForm, "firstName")) {
+              <p class="form-error">
+                {{ fieldError(profileForm, "firstName") }}
+              </p>
+            }
+          </div>
+          <div class="form-field">
+            <label class="form-label">Last Name *</label>
+            <input type="text" formControlName="lastName" class="form-input" />
+            @if (fieldError(profileForm, "lastName")) {
+              <p class="form-error">
+                {{ fieldError(profileForm, "lastName") }}
+              </p>
+            }
+          </div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Email</label>
+          <input
+            type="email"
+            [value]="user()!.email"
+            class="form-input form-input--disabled"
+            disabled
+          />
+          <p class="form-hint">
+            Email cannot be changed. Contact your admin if needed.
+          </p>
+        </div>
+        <div class="form-actions">
+          <button
+            type="submit"
+            [disabled]="savingProfile()"
+            class="btn btn--primary"
+          >
+            @if (savingProfile()) {
+              <svg class="spinner spinner--sm" fill="none" viewBox="0 0 24 24">
+                <circle
+                  class="spinner__track"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path
+                  class="spinner__fill"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+            }
+            Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card">
+      <h2 class="card__title">Change Password</h2>
+
+      @if (passwordError()) {
+        <div class="alert alert--error">{{ passwordError() }}</div>
+      }
+      @if (passwordSuccess()) {
+        <div class="alert alert--success">{{ passwordSuccess() }}</div>
+      }
+
+      <form
+        [formGroup]="passwordForm"
+        (ngSubmit)="onChangePassword()"
+        class="form"
+        novalidate
+      >
+        <div class="form-field">
+          <label class="form-label">Current Password *</label>
+          <div class="input-password">
+            <input
+              [type]="showCurrent() ? 'text' : 'password'"
+              formControlName="currentPassword"
+              class="form-input form-input--password"
+              placeholder="Your current password"
+            />
+            <button
+              type="button"
+              (click)="showCurrent.set(!showCurrent())"
+              class="input-password__toggle"
+            >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            </button>
+          </div>
+          @if (fieldError(passwordForm, "currentPassword")) {
+            <p class="form-error">
+              {{ fieldError(passwordForm, "currentPassword") }}
+            </p>
+          }
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">New Password *</label>
+          <div class="input-password">
+            <input
+              [type]="showNew() ? 'text' : 'password'"
+              formControlName="newPassword"
+              class="form-input form-input--password"
+              placeholder="Min 8 chars, 1 uppercase, 1 number"
+            />
+            <button
+              type="button"
+              (click)="showNew.set(!showNew())"
+              class="input-password__toggle"
+            >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            </button>
+          </div>
+          @if (fieldError(passwordForm, "newPassword")) {
+            <p class="form-error">
+              {{ fieldError(passwordForm, "newPassword") }}
+            </p>
+          }
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Confirm New Password *</label>
+          <div class="input-password">
+            <input
+              [type]="showConfirm() ? 'text' : 'password'"
+              formControlName="confirmPassword"
+              class="form-input form-input--password"
+              placeholder="Repeat new password"
+            />
+            <button
+              type="button"
+              (click)="showConfirm.set(!showConfirm())"
+              class="input-password__toggle"
+            >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                />
+              </svg>
+            </button>
+          </div>
+          @if (
+            passwordForm.errors?.["mismatch"] &&
+            passwordForm.get("confirmPassword")?.touched
+          ) {
+            <p class="form-error">Passwords do not match.</p>
+          }
+        </div>
+
+        <div class="form-actions">
+          <button
+            type="submit"
+            [disabled]="savingPassword()"
+            class="btn btn--primary"
+          >
+            @if (savingPassword()) {
+              <svg class="spinner spinner--sm" fill="none" viewBox="0 0 24 24">
+                <circle
+                  class="spinner__track"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                />
+                <path
+                  class="spinner__fill"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+            }
+            Change Password
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

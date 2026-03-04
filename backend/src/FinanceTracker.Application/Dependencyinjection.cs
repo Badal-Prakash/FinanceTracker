@@ -1,4 +1,5 @@
 using FinanceTracker.Application.Common.Behaviours;
+using FinanceTracker.Application.Common.Interfaces;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +20,6 @@ public static class DependencyInjection
         // Pipeline behaviours (order matters - logging wraps validation)
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehaviour<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
-
         return services;
     }
 }

@@ -1,0 +1,352 @@
+<div class="page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-header__title">Budget Tracking</h1>
+      <p class="page-header__subtitle">
+        Monitor spending against your monthly budgets
+      </p>
+    </div>
+    <a routerLink="/budgets/set" class="btn btn--primary">
+      <svg
+        class="btn__icon"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        />
+      </svg>
+      Set Budgets
+    </a>
+  </div>
+
+  <!-- Month Selector -->
+  <div class="month-nav">
+    <button (click)="prevMonth()" class="month-nav__btn">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M15 19l-7-7 7-7"
+        />
+      </svg>
+    </button>
+    <span class="month-nav__label">
+      {{
+        summary()?.monthLabel ??
+          months[selectedMonth() - 1] + " " + selectedYear()
+      }}
+    </span>
+    <button
+      (click)="nextMonth()"
+      [disabled]="isCurrentMonth()"
+      class="month-nav__btn"
+    >
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 5l7 7-7 7"
+        />
+      </svg>
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state">
+      <svg class="spinner" fill="none" viewBox="0 0 24 24">
+        <circle
+          class="spinner__track"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+        />
+        <path
+          class="spinner__fill"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        />
+      </svg>
+    </div>
+  }
+
+  @if (!loading() && summary()) {
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+      <div class="summary-card">
+        <p class="summary-card__label">Total Budget</p>
+        <p class="summary-card__value">
+          {{ summary()!.totalBudgeted | currency }}
+        </p>
+        <p class="summary-card__sub">
+          {{ summary()!.categories.length }} categories
+        </p>
+      </div>
+      <div
+        class="summary-card"
+        [class.summary-card--danger]="
+          summary()!.overallUtilisationPercent > 100
+        "
+      >
+        <p class="summary-card__label">Total Spent</p>
+        <p class="summary-card__value">
+          {{ summary()!.totalSpent | currency }}
+        </p>
+        <p class="summary-card__sub">
+          {{ summary()!.overallUtilisationPercent | number: "1.0-1" }}% of
+          budget
+        </p>
+      </div>
+      <div
+        class="summary-card"
+        [class.summary-card--success]="summary()!.totalRemaining > 0"
+      >
+        <p class="summary-card__label">Remaining</p>
+        <p
+          class="summary-card__value"
+          [class.summary-card__value--success]="summary()!.totalRemaining > 0"
+          [class.summary-card__value--danger]="summary()!.totalRemaining < 0"
+        >
+          {{ summary()!.totalRemaining | currency }}
+        </p>
+        <p class="summary-card__sub">
+          {{ summary()!.totalRemaining >= 0 ? "under budget" : "over budget" }}
+        </p>
+      </div>
+      <div class="summary-card">
+        <p class="summary-card__label">Alerts</p>
+        <p
+          class="summary-card__value"
+          [class.summary-card__value--danger]="summary()!.alerts.length > 0"
+        >
+          {{ summary()!.alerts.length }}
+        </p>
+        <p class="summary-card__sub">
+          {{
+            summary()!.alerts.length === 0 ? "all on track" : "need attention"
+          }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Overall Progress Bar -->
+    <div class="card overall-card">
+      <div class="overall-header">
+        <span class="overall-label">Overall Budget Usage</span>
+        <span class="overall-pct"
+          >{{ summary()!.overallUtilisationPercent | number: "1.0-1" }}%</span
+        >
+      </div>
+      <div class="progress-track">
+        <div
+          [class]="
+            progressClass(
+              summary()!.overallUtilisationPercent > 100
+                ? 'exceeded'
+                : summary()!.overallUtilisationPercent >= 90
+                  ? 'critical'
+                  : summary()!.overallUtilisationPercent >= 80
+                    ? 'warning'
+                    : 'ok'
+            )
+          "
+          [style.width]="barWidth(summary()!.overallUtilisationPercent)"
+        ></div>
+      </div>
+      <div class="overall-footer">
+        <span>{{ summary()!.totalSpent | currency }} spent</span>
+        <span>{{ summary()!.totalBudgeted | currency }} budgeted</span>
+      </div>
+    </div>
+
+    <!-- Alerts Banner -->
+    @if (summary()!.alerts.length > 0) {
+      <div class="alerts-section">
+        <h2 class="section-title">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+            />
+          </svg>
+          Alerts
+        </h2>
+        <div class="alerts-grid">
+          @for (alert of summary()!.alerts; track alert.categoryName) {
+            <div [class]="alertClass(alert.level)">
+              <div class="alert-card__header">
+                <span
+                  class="alert-card__dot"
+                  [style.background]="alert.categoryColor"
+                ></span>
+                <span class="alert-card__name">{{ alert.categoryName }}</span>
+                <span
+                  class="alert-card__badge alert-card__badge--{{ alert.level }}"
+                >
+                  {{
+                    alert.level === "exceeded"
+                      ? "Over Budget"
+                      : alert.level === "critical"
+                        ? "Critical"
+                        : "Warning"
+                  }}
+                </span>
+              </div>
+              <div class="alert-card__body">
+                <span
+                  >{{ alert.spentAmount | currency }} of
+                  {{ alert.budgetedAmount | currency }}</span
+                >
+                <span class="alert-card__pct"
+                  >{{ alert.utilisationPercent | number: "1.0-1" }}%</span
+                >
+              </div>
+              <div class="progress-track progress-track--sm">
+                <div
+                  [class]="progressClass(alert.level)"
+                  [style.width]="barWidth(alert.utilisationPercent)"
+                ></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Category Budgets -->
+    @if (summary()!.categories.length === 0) {
+      <div class="empty-state">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+          />
+        </svg>
+        <p>No budgets set for this month</p>
+        <a routerLink="/budgets/set" class="btn btn--primary btn--sm"
+          >Set Budgets</a
+        >
+      </div>
+    } @else {
+      <div class="card">
+        <h2 class="section-title">Category Breakdown</h2>
+        <div class="budget-list">
+          @for (
+            budget of summary()!.categories;
+            track budget.id;
+            let i = $index
+          ) {
+            <div class="budget-row">
+              <div class="budget-row__info">
+                <span
+                  class="budget-row__dot"
+                  [style.background]="budget.categoryColor"
+                ></span>
+                <div class="budget-row__text">
+                  <span class="budget-row__name">{{
+                    budget.categoryName
+                  }}</span>
+                  <span class="budget-row__amounts">
+                    {{ budget.spentAmount | currency }} of
+                    {{ budget.budgetedAmount | currency }}
+                  </span>
+                </div>
+              </div>
+              <div class="budget-row__bar-area">
+                <div class="progress-track">
+                  <div
+                    [class]="progressClass(budget.alertLevel)"
+                    [style.width]="barWidth(budget.utilisationPercent)"
+                  ></div>
+                </div>
+                <div class="budget-row__meta">
+                  <span [class]="budgetStatusClass(budget)">
+                    {{ budget.utilisationPercent | number: "1.0-1" }}%
+                  </span>
+                  <span
+                    class="budget-row__remaining"
+                    [class.budget-row__remaining--over]="
+                      budget.remainingAmount < 0
+                    "
+                  >
+                    {{
+                      budget.remainingAmount >= 0
+                        ? (budget.remainingAmount | currency) + " left"
+                        : (budget.remainingAmount * -1 | currency) + " over"
+                    }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            @if (i < summary()!.categories.length - 1) {
+              <div class="divider"></div>
+            }
+          }
+        </div>
+      </div>
+    }
+
+    <!-- 6-Month Trend -->
+    @if (trend().length > 0) {
+      <div class="card">
+        <h2 class="section-title">6-Month Trend</h2>
+        <div class="trend-chart">
+          @for (m of trend(); track m.monthLabel) {
+            <div class="trend-col">
+              <div class="trend-bars">
+                <div class="trend-bar-wrap trend-bar-wrap--budget">
+                  <div
+                    class="trend-bar trend-bar--budget"
+                    [style.height]="trendBarWidth(m.totalBudgeted)"
+                    [title]="'Budget: ' + m.totalBudgeted"
+                  ></div>
+                </div>
+                <div class="trend-bar-wrap trend-bar-wrap--spent">
+                  <div
+                    class="trend-bar"
+                    [style.height]="trendBarWidth(m.totalSpent)"
+                    [class.trend-bar--exceeded]="m.utilisationPercent > 100"
+                    [class.trend-bar--critical]="
+                      m.utilisationPercent >= 90 && m.utilisationPercent <= 100
+                    "
+                    [class.trend-bar--ok]="m.utilisationPercent < 90"
+                    [title]="'Spent: ' + m.totalSpent"
+                  ></div>
+                </div>
+              </div>
+              <span class="trend-label">{{ m.monthLabel.split(" ")[0] }}</span>
+            </div>
+          }
+        </div>
+        <div class="trend-legend">
+          <span class="legend-item"
+            ><span class="legend-dot legend-dot--budget"></span>Budgeted</span
+          >
+          <span class="legend-item"
+            ><span class="legend-dot legend-dot--spent"></span>Spent</span
+          >
+        </div>
+      </div>
+    }
+  }
+
+  @if (!loading() && !summary()) {
+    <div class="empty-state">
+      <p>Could not load budget data.</p>
+      <button (click)="load()" class="btn btn--secondary">Retry</button>
+    </div>
+  }
+</div>

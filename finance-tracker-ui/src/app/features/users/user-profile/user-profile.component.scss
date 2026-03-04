@@ -1,0 +1,77 @@
+.page { padding: 2rem; max-width: 40rem; }
+
+.page-header { margin-bottom: 2rem;
+  &__title    { font-size: 1.5rem; font-weight: 700; color: var(--color-text-primary); margin: 0; }
+  &__subtitle { font-size: 0.875rem; color: var(--color-text-muted); margin: 0.25rem 0 0; }
+}
+
+.loading-state { display: flex; justify-content: center; padding: 5rem 0; }
+
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.75rem; padding: 1.5rem; margin-bottom: 1.25rem;
+  &__title { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-secondary); margin: 0 0 1.25rem; }
+}
+
+// Profile header card
+.profile-header { display: flex; align-items: center; gap: 1.25rem; }
+.profile-avatar {
+  width: 4rem; height: 4rem; border-radius: 50%; background: #4f46e5; color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.25rem; font-weight: 700; text-transform: uppercase; flex-shrink: 0;
+}
+.profile-header__info { display: flex; flex-direction: column; gap: 0.25rem; }
+.profile-header__name  { font-size: 1.125rem; font-weight: 600; color: var(--color-text-primary); margin: 0; }
+.profile-header__email { font-size: 0.875rem; color: var(--color-text-muted); margin: 0; }
+
+.role-badge {
+  display: inline-flex; align-items: center; padding: 0.2rem 0.625rem;
+  border-radius: 9999px; font-size: 0.75rem; font-weight: 500; width: fit-content;
+  &--employee   { background: #eff6ff; color: #1d4ed8; }
+  &--manager    { background: #faf5ff; color: #7e22ce; }
+  &--admin      { background: #fff7ed; color: #c2410c; }
+  &--superadmin { background: #fef2f2; color: #991b1b; }
+}
+
+// Alerts
+.alert { padding: 0.75rem 1rem; border-radius: 0.5rem; font-size: 0.875rem; margin-bottom: 1rem;
+  &--error   { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+  &--success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+}
+
+// Form
+.form { display: flex; flex-direction: column; gap: 1rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  @media (max-width: 480px) { grid-template-columns: 1fr; }
+}
+.form-field { display: flex; flex-direction: column; gap: 0.3rem; }
+.form-label { font-size: 0.875rem; font-weight: 500; color: var(--color-text-secondary); }
+.form-input {
+  width: 100%; padding: 0.625rem 0.875rem; font-size: 0.875rem;
+  border: 1px solid var(--color-border); border-radius: 0.5rem;
+  background: var(--color-bg); color: var(--color-text-primary);
+  outline: none; box-sizing: border-box; transition: box-shadow 0.15s;
+  &:focus { box-shadow: 0 0 0 2px #6366f1; }
+  &--disabled { background: var(--color-surface-hover); color: var(--color-text-muted); cursor: not-allowed; }
+  &--password { padding-right: 2.75rem; }
+}
+.form-error { font-size: 0.75rem; color: #dc2626; margin: 0; }
+.form-hint  { font-size: 0.75rem; color: var(--color-text-muted); margin: 0; }
+
+// Password toggle
+.input-password { position: relative;
+  &__toggle { position: absolute; right: 0.625rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--color-text-muted); padding: 0.25rem; display: flex;
+    svg { width: 1.125rem; height: 1.125rem; }
+    &:hover { color: var(--color-text-primary); }
+  }
+}
+
+// Actions
+.form-actions { padding-top: 0.25rem; }
+.btn {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.625rem 1.5rem; font-size: 0.875rem; font-weight: 500;
+  border-radius: 0.5rem; border: none; cursor: pointer; transition: background 0.15s;
+  &--primary { background: #4f46e5; color: #fff; &:hover:not(:disabled) { background: #4338ca; } &:disabled { opacity: 0.6; cursor: not-allowed; } }
+}
+
+.spinner { width: 1.5rem; height: 1.5rem; animation: spin 1s linear infinite; color: #4f46e5; &--sm { width: 1rem; height: 1rem; } &__track { opacity: 0.25; } &__fill { opacity: 0.75; } }
+@keyframes spin { to { transform: rotate(360deg); } }

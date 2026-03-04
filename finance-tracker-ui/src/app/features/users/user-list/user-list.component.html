@@ -1,0 +1,226 @@
+<div class="page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-header__title">Team Members</h1>
+      <p class="page-header__subtitle">Manage your team, roles and access</p>
+    </div>
+    <a routerLink="/users/invite" class="btn btn--primary">
+      <svg
+        class="btn__icon"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+        />
+      </svg>
+      Invite Member
+    </a>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div class="stat-pill">
+      <span class="stat-pill__dot stat-pill__dot--active"></span>
+      <span class="stat-pill__label">{{ activeCount() }} active</span>
+    </div>
+    <div class="stat-pill">
+      <span class="stat-pill__dot stat-pill__dot--inactive"></span>
+      <span class="stat-pill__label">{{ inactiveCount() }} inactive</span>
+    </div>
+    <div class="stat-pill">
+      <span class="stat-pill__label">{{ users().length }} total</span>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <div class="filter-search">
+      <svg
+        class="filter-search__icon"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"
+        />
+      </svg>
+      <input
+        type="text"
+        [(ngModel)]="filters.search"
+        (ngModelChange)="onFilterChange()"
+        placeholder="Search by name or email..."
+        class="filter-search__input"
+      />
+    </div>
+
+    <select
+      [(ngModel)]="filters.role"
+      (ngModelChange)="onFilterChange()"
+      class="filter-select"
+    >
+      <option value="">All Roles</option>
+      @for (r of roleOptions; track r) {
+        <option [value]="r">{{ roleLabels[r] }}</option>
+      }
+    </select>
+
+    <select
+      [(ngModel)]="filters.isActive"
+      (ngModelChange)="onFilterChange()"
+      class="filter-select"
+    >
+      <option value="">All Status</option>
+      <option value="true">Active</option>
+      <option value="false">Inactive</option>
+    </select>
+
+    @if (hasFilters()) {
+      <button (click)="clearFilters()" class="btn-clear">Clear</button>
+    }
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    @if (loading()) {
+      <div class="table-empty">
+        <svg class="spinner" fill="none" viewBox="0 0 24 24">
+          <circle
+            class="spinner__track"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            stroke-width="4"
+          />
+          <path
+            class="spinner__fill"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          />
+        </svg>
+      </div>
+    } @else if (users().length === 0) {
+      <div class="table-empty">
+        <svg
+          class="table-empty__icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="1.5"
+            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+          />
+        </svg>
+        <p class="table-empty__text">No team members found</p>
+        <a routerLink="/users/invite" class="table-empty__link"
+          >Invite your first member</a
+        >
+      </div>
+    } @else {
+      <table class="table">
+        <thead class="table__head">
+          <tr>
+            <th class="table__th">Member</th>
+            <th class="table__th">Role</th>
+            <th class="table__th">Status</th>
+            <th class="table__th">Joined</th>
+            <th class="table__th table__th--right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr
+              class="table__row"
+              [class.table__row--inactive]="!user.isActive"
+            >
+              <!-- Member -->
+              <td class="table__td">
+                <div class="member-cell">
+                  <div class="avatar" [class.avatar--inactive]="!user.isActive">
+                    {{ initials(user) }}
+                  </div>
+                  <div class="member-cell__info">
+                    <p class="member-cell__name">{{ user.fullName }}</p>
+                    <p class="member-cell__email">{{ user.email }}</p>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Role -->
+              <td class="table__td">
+                @if (user.role !== "SuperAdmin") {
+                  <select
+                    [value]="user.role"
+                    (change)="changeRole(user, $any($event.target).value)"
+                    [disabled]="actionLoading() === user.id"
+                    class="role-select"
+                  >
+                    @for (r of roleOptions; track r) {
+                      <option [value]="r">{{ roleLabels[r] }}</option>
+                    }
+                  </select>
+                } @else {
+                  <span [class]="roleClass(user.role)">{{
+                    roleLabels[user.role]
+                  }}</span>
+                }
+              </td>
+
+              <!-- Status -->
+              <td class="table__td">
+                <span
+                  class="status-badge"
+                  [class.status-badge--active]="user.isActive"
+                  [class.status-badge--inactive]="!user.isActive"
+                >
+                  {{ user.isActive ? "Active" : "Inactive" }}
+                </span>
+              </td>
+
+              <!-- Joined -->
+              <td class="table__td table__td--muted">
+                {{ user.createdAt | date: "MMM d, y" }}
+              </td>
+
+              <!-- Actions -->
+              <td class="table__td table__td--right">
+                @if (user.role !== "SuperAdmin") {
+                  @if (user.isActive) {
+                    <button
+                      (click)="deactivate(user)"
+                      [disabled]="actionLoading() === user.id"
+                      class="action-btn action-btn--danger"
+                    >
+                      Deactivate
+                    </button>
+                  } @else {
+                    <button
+                      (click)="reactivate(user)"
+                      [disabled]="actionLoading() === user.id"
+                      class="action-btn action-btn--success"
+                    >
+                      Reactivate
+                    </button>
+                  }
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
