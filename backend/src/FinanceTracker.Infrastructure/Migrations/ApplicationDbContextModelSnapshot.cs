@@ -186,7 +186,8 @@ namespace FinanceTracker.Infrastructure.Migrations
                         .HasColumnType("numeric(18,2)");
 
                     b.Property<string>("ClientAddress")
-                        .HasColumnType("text");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("ClientEmail")
                         .IsRequired()
@@ -245,9 +246,17 @@ namespace FinanceTracker.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Description")
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<Guid>("InvoiceId")
                         .HasColumnType("uuid");
@@ -255,9 +264,18 @@ namespace FinanceTracker.Infrastructure.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("uuid");
+
                     b.Property<decimal>("UnitPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -412,11 +430,13 @@ namespace FinanceTracker.Infrastructure.Migrations
 
             modelBuilder.Entity("FinanceTracker.Domain.Entities.InvoiceLineItem", b =>
                 {
-                    b.HasOne("FinanceTracker.Domain.Entities.Invoice", null)
+                    b.HasOne("FinanceTracker.Domain.Entities.Invoice", "Invoice")
                         .WithMany("LineItems")
                         .HasForeignKey("InvoiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Invoice");
                 });
 
             modelBuilder.Entity("FinanceTracker.Domain.Entities.Invoice", b =>

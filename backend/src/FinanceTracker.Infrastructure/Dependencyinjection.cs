@@ -1,4 +1,5 @@
 using FinanceTracker.Application.Common.Interfaces;
+using FinanceTracker.Application.Common.Models;
 using FinanceTracker.Infrastructure.Persistence;
 using FinanceTracker.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,6 @@ public static class DependencyInjection
 
         services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<ApplicationDbContext>());
-
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
         return services;

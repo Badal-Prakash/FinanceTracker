@@ -6,11 +6,18 @@ import {
   ExpenseListItem,
   PaginatedList,
 } from '../../../core/models/expense.model';
+import { ExpenseImportComponent } from '../expense-import/expense-import.component';
 
 @Component({
   selector: 'app-expense-list',
   standalone: true,
-  imports: [CommonModule, CurrencyPipe, DatePipe, RouterLink],
+  imports: [
+    CommonModule,
+    CurrencyPipe,
+    DatePipe,
+    RouterLink,
+    ExpenseImportComponent,
+  ],
   templateUrl: './expense-list.component.html',
   styleUrl: './expense-list.component.scss',
 })
@@ -21,6 +28,7 @@ export class ExpenseListComponent implements OnInit {
   currentPage = signal(1);
 
   statuses = ['', 'Draft', 'Submitted', 'Approved', 'Rejected'];
+  showImport = signal(false);
 
   constructor(private expenseService: ExpenseService) {}
 
@@ -54,6 +62,11 @@ export class ExpenseListComponent implements OnInit {
   changePage(page: number) {
     this.currentPage.set(page);
     this.loadExpenses();
+  }
+
+  onImportClosed(success: boolean): void {
+    this.showImport.set(false);
+    if (success) this.loadExpenses();
   }
 
   statusClass(status: string): string {

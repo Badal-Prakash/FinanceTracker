@@ -1,0 +1,172 @@
+<div class="import-overlay">
+  <div class="import-modal">
+    <div class="import-header">
+      <h2 class="import-title">Import Expenses</h2>
+      <button (click)="close()" class="btn-close">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <div class="import-content">
+      @if (!file()) {
+        <div
+          class="drop-zone"
+          (dragover)="$event.preventDefault()"
+          (drop)="onFileDropped($event)"
+          (click)="fileInput.click()"
+        >
+          <svg
+            class="drop-icon"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+            />
+          </svg>
+          <p class="drop-text">
+            <strong>Click to upload</strong> or drag and drop
+          </p>
+          <p class="drop-subtext">CSV or Excel (.xlsx) files supported</p>
+          <input
+            #fileInput
+            type="file"
+            hidden
+            accept=".csv, .xlsx"
+            (change)="onFileSelected($event)"
+          />
+        </div>
+
+        <div class="template-section">
+          <p>Need a starting point?</p>
+          <button (click)="downloadTemplate()" class="btn-link">
+            Download Template File
+          </button>
+        </div>
+      } @else {
+        <div class="preview-section">
+          <div class="file-summary">
+            <div class="file-icon">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <div class="file-details">
+              <p class="file-name">{{ file()?.name }}</p>
+              <button
+                (click)="file.set(null); previewData.set([]); error.set(null)"
+                class="btn-link"
+              >
+                Change File
+              </button>
+            </div>
+          </div>
+
+          @if (loading()) {
+            <div class="loading-state">
+              <svg class="spinner" fill="none" viewBox="0 0 24 24">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                  style="opacity: 0.25"
+                />
+                <path
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  style="opacity: 0.75"
+                />
+              </svg>
+              <p>Analyzing file...</p>
+            </div>
+          } @else if (error()) {
+            <div class="error-banner">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              {{ error() }}
+            </div>
+          } @else {
+            <div class="preview-table-wrapper">
+              <table class="preview-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of previewData(); track $index) {
+                    <tr>
+                      <td>{{ row.expenseDate | date: "MMM d, y" }}</td>
+                      <td>{{ row.title }}</td>
+                      <td>{{ row.categoryName }}</td>
+                      <td>{{ row.amount | currency }}</td>
+                      <td>
+                        @if (row.isValid) {
+                          <span class="badge badge-success">Valid</span>
+                        } @else {
+                          <span
+                            class="badge badge-error"
+                            [title]="row.errors?.join(', ')"
+                            >Invalid</span
+                          >
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="modal-actions">
+              <button
+                (click)="file.set(null); previewData.set([])"
+                class="btn-cancel"
+              >
+                Cancel
+              </button>
+              <button
+                (click)="confirmImport()"
+                [disabled]="importing() || previewData().length === 0"
+                class="btn-primary"
+              >
+                @if (importing()) {
+                  Importing...
+                } @else {
+                  Import Expenses
+                }
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

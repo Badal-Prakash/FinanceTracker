@@ -5,24 +5,47 @@
       <h1 class="page-title">Expenses</h1>
       <p class="page-subtitle">{{ data()?.totalCount ?? 0 }} total expenses</p>
     </div>
-    <a routerLink="/expenses/new" class="btn-new">
-      <svg
-        width="16"
-        height="16"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M12 4v16m8-8H4"
-        />
-      </svg>
-      New Expense
-    </a>
+    <div class="header-actions">
+      <button (click)="showImport.set(true)" class="btn-import">
+        <svg
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+          />
+        </svg>
+        Import
+      </button>
+      <a routerLink="/expenses/new" class="btn-new">
+        <svg
+          width="16"
+          height="16"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4v16m8-8H4"
+          />
+        </svg>
+        New Expense
+      </a>
+    </div>
   </div>
+
+  @if (showImport()) {
+    <app-expense-import (closed)="onImportClosed($event)" />
+  }
 
   <!-- Status Filter Tabs -->
   <div class="filter-tabs">

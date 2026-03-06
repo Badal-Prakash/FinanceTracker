@@ -16,8 +16,16 @@
     <Folder Include="Common/Exceptions/" />
     <Folder Include="Common/Exceptions/Behaviours/" />
     <Folder Include="Common/Interfaces/" />
+    <Folder Include="Common/Models/" />
     <Folder Include="Dashboard/" />
-    <Folder Include="Expenses/" />
+    <Folder Include="Dtos/" />
+    <Folder Include="Expenses/Commands/ApproveExpense/" />
+    <Folder Include="Expenses/Commands/DeleteExpense/" />
+    <Folder Include="Expenses/Commands/RejectExpense/" />
+    <Folder Include="Expenses/Commands/SubmitExpense/" />
+    <Folder Include="Expenses/Queries/" />
+    <Folder Include="Expenses/Queries/GetExpenseById/" />
+    <Folder Include="Expenses/Queries/GetExpensesList/" />
     <Folder Include="Receipts/" />
     <Folder Include="Reports/" />
     <Folder Include="Users/" />
@@ -31,7 +39,7 @@
   <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.1" />
   <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.1" />
   <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
-  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.18" />
+  <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.0" />
 </ItemGroup>
 
   <ItemGroup>

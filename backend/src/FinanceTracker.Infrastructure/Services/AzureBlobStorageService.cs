@@ -5,11 +5,6 @@ using Microsoft.Extensions.Configuration;
 
 namespace FinanceTracker.Infrastructure.Services;
 
-/// <summary>
-/// Azure Blob Storage implementation of IBlobStorageService.
-/// Requires "AzureStorage:ConnectionString" in appsettings.json.
-/// Install: dotnet add package Azure.Storage.Blobs
-/// </summary>
 public class AzureBlobStorageService : IBlobStorageService
 {
     private readonly BlobServiceClient _client;

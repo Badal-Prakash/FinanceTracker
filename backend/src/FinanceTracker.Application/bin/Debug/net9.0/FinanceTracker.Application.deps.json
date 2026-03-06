@@ -16,7 +16,7 @@
           "Microsoft.AspNetCore.Http": "2.3.9",
           "Microsoft.EntityFrameworkCore": "9.0.1",
           "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.1",
-          "Npgsql.EntityFrameworkCore.PostgreSQL": "7.0.18"
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "9.0.0"
         },
         "runtime": {
           "FinanceTracker.Application.dll": {}
@@ -152,15 +152,17 @@
         }
       },
       "Microsoft.EntityFrameworkCore.Analyzers/9.0.1": {},
-      "Microsoft.EntityFrameworkCore.Relational/7.0.18": {
+      "Microsoft.EntityFrameworkCore.Relational/9.0.0": {
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "9.0.1",
-          "Microsoft.Extensions.Configuration.Abstractions": "7.0.0"
+          "Microsoft.Extensions.Caching.Memory": "9.0.1",
+          "Microsoft.Extensions.Configuration.Abstractions": "9.0.0",
+          "Microsoft.Extensions.Logging": "9.0.1"
         },
         "runtime": {
-          "lib/net6.0/Microsoft.EntityFrameworkCore.Relational.dll": {
-            "assemblyVersion": "7.0.18.0",
-            "fileVersion": "7.0.1824.16810"
+          "lib/net8.0/Microsoft.EntityFrameworkCore.Relational.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.24.52902"
           }
         }
       },
@@ -190,14 +192,14 @@
           }
         }
       },
-      "Microsoft.Extensions.Configuration.Abstractions/7.0.0": {
+      "Microsoft.Extensions.Configuration.Abstractions/9.0.0": {
         "dependencies": {
           "Microsoft.Extensions.Primitives": "9.0.1"
         },
         "runtime": {
-          "lib/net7.0/Microsoft.Extensions.Configuration.Abstractions.dll": {
-            "assemblyVersion": "7.0.0.0",
-            "fileVersion": "7.0.22.51805"
+          "lib/net9.0/Microsoft.Extensions.Configuration.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.24.52809"
           }
         }
       },
@@ -284,38 +286,39 @@
           }
         }
       },
-      "Npgsql/7.0.7": {
+      "Npgsql/9.0.0": {
         "dependencies": {
-          "Microsoft.Extensions.Logging.Abstractions": "9.0.1"
+          "Microsoft.Extensions.Logging.Abstractions": "9.0.1",
+          "System.Text.Json": "9.0.0"
         },
         "runtime": {
-          "lib/net7.0/Npgsql.dll": {
-            "assemblyVersion": "7.0.7.0",
-            "fileVersion": "7.0.7.0"
+          "lib/net8.0/Npgsql.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.0.0"
           }
         }
       },
-      "Npgsql.EntityFrameworkCore.PostgreSQL/7.0.18": {
+      "Npgsql.EntityFrameworkCore.PostgreSQL/9.0.0": {
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "9.0.1",
-          "Microsoft.EntityFrameworkCore.Abstractions": "9.0.1",
-          "Microsoft.EntityFrameworkCore.Relational": "7.0.18",
-          "Npgsql": "7.0.7"
+          "Microsoft.EntityFrameworkCore.Relational": "9.0.0",
+          "Npgsql": "9.0.0"
         },
         "runtime": {
-          "lib/net7.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll": {
-            "assemblyVersion": "7.0.18.0",
-            "fileVersion": "7.0.18.0"
+          "lib/net8.0/Npgsql.EntityFrameworkCore.PostgreSQL.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.0.0"
           }
         }
       },
       "System.Buffers/4.6.0": {},
       "System.Text.Encodings.Web/8.0.0": {},
+      "System.Text.Json/9.0.0": {},
       "FinanceTracker.Domain/1.0.0": {
         "dependencies": {
           "MediatR": "12.0.0",
           "Microsoft.AspNetCore.Http": "2.3.9",
-          "Npgsql.EntityFrameworkCore.PostgreSQL": "7.0.18"
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "9.0.0"
         },
         "runtime": {
           "FinanceTracker.Domain.dll": {
@@ -423,12 +426,12 @@
       "path": "microsoft.entityframeworkcore.analyzers/9.0.1",
       "hashPath": "microsoft.entityframeworkcore.analyzers.9.0.1.nupkg.sha512"
     },
-    "Microsoft.EntityFrameworkCore.Relational/7.0.18": {
+    "Microsoft.EntityFrameworkCore.Relational/9.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-19T8HjEkqyvuPf6C3WPM1B0h10/ezf/+KHPFQxp8ODHN3YKjV/5tKyuZyjRULa3EcfTW4TiaOqPIfs5WSVfwYw==",
-      "path": "microsoft.entityframeworkcore.relational/7.0.18",
-      "hashPath": "microsoft.entityframeworkcore.relational.7.0.18.nupkg.sha512"
+      "sha512": "sha512-j+msw6fWgAE9M3Q/5B9Uhv7pdAdAQUvFPJAiBJmoy+OXvehVbfbCE8ftMAa51Uo2ZeiqVnHShhnv4Y4UJJmUzA==",
+      "path": "microsoft.entityframeworkcore.relational/9.0.0",
+      "hashPath": "microsoft.entityframeworkcore.relational.9.0.0.nupkg.sha512"
     },
     "Microsoft.Extensions.Caching.Abstractions/9.0.1": {
       "type": "package",
@@ -444,12 +447,12 @@
       "path": "microsoft.extensions.caching.memory/9.0.1",
       "hashPath": "microsoft.extensions.caching.memory.9.0.1.nupkg.sha512"
     },
-    "Microsoft.Extensions.Configuration.Abstractions/7.0.0": {
+    "Microsoft.Extensions.Configuration.Abstractions/9.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-f34u2eaqIjNO9YLHBz8rozVZ+TcFiFs0F3r7nUJd7FRkVSxk8u4OpoK226mi49MwexHOR2ibP9MFvRUaLilcQQ==",
-      "path": "microsoft.extensions.configuration.abstractions/7.0.0",
-      "hashPath": "microsoft.extensions.configuration.abstractions.7.0.0.nupkg.sha512"
+      "sha512": "sha512-lqvd7W3FGKUO1+ZoUEMaZ5XDJeWvjpy2/M/ptCGz3tXLD4HWVaSzjufsAsjemasBEg+2SxXVtYVvGt5r2nKDlg==",
+      "path": "microsoft.extensions.configuration.abstractions/9.0.0",
+      "hashPath": "microsoft.extensions.configuration.abstractions.9.0.0.nupkg.sha512"
     },
     "Microsoft.Extensions.DependencyInjection/9.0.1": {
       "type": "package",
@@ -507,19 +510,19 @@
       "path": "microsoft.net.http.headers/2.3.8",
       "hashPath": "microsoft.net.http.headers.2.3.8.nupkg.sha512"
     },
-    "Npgsql/7.0.7": {
+    "Npgsql/9.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-A3BjyNebHjw/MahM6n3VnKbxrj/hQnMROEkUNUTjhUVv7yvcGnfBgw/FszahT9uCR23AVD2N/0Tvw1aHgxr9Gg==",
-      "path": "npgsql/7.0.7",
-      "hashPath": "npgsql.7.0.7.nupkg.sha512"
+      "sha512": "sha512-zu1nCRt0gWP/GR0reYgg0Bl5o8qyNV7mVAgzAbVLRiAd1CYXcf/9nrubPH0mt93u8iGTKmYqWaLVECEAcE6IfQ==",
+      "path": "npgsql/9.0.0",
+      "hashPath": "npgsql.9.0.0.nupkg.sha512"
     },
-    "Npgsql.EntityFrameworkCore.PostgreSQL/7.0.18": {
+    "Npgsql.EntityFrameworkCore.PostgreSQL/9.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-W+mFtJ1D4kSsCIBMScaq3tq8jdoR0Healb6knhSKqnlIoGGQwkHltHMsFeWacieLQPA+e4UrIgucfDpRpRXQRA==",
-      "path": "npgsql.entityframeworkcore.postgresql/7.0.18",
-      "hashPath": "npgsql.entityframeworkcore.postgresql.7.0.18.nupkg.sha512"
+      "sha512": "sha512-ObngKFRLMBAeMqQzK7SC0Q6WZtWw0imPmEkVPo12yLVF3fioz2TN+w0mhNMJ5cVd/sLB2u+jei0bmA9sDMtkMw==",
+      "path": "npgsql.entityframeworkcore.postgresql/9.0.0",
+      "hashPath": "npgsql.entityframeworkcore.postgresql.9.0.0.nupkg.sha512"
     },
     "System.Buffers/4.6.0": {
       "type": "package",
@@ -534,6 +537,13 @@
       "sha512": "sha512-yev/k9GHAEGx2Rg3/tU6MQh4HGBXJs70y7j1LaM1i/ER9po+6nnQ6RRqTJn1E7Xu0fbIFK80Nh5EoODxrbxwBQ==",
       "path": "system.text.encodings.web/8.0.0",
       "hashPath": "system.text.encodings.web.8.0.0.nupkg.sha512"
+    },
+    "System.Text.Json/9.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-js7+qAu/9mQvnhA4EfGMZNEzXtJCDxgkgj8ohuxq/Qxv+R56G+ljefhiJHOxTNiw54q8vmABCWUwkMulNdlZ4A==",
+      "path": "system.text.json/9.0.0",
+      "hashPath": "system.text.json.9.0.0.nupkg.sha512"
     },
     "FinanceTracker.Domain/1.0.0": {
       "type": "project",

@@ -1,149 +1,178 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import {
-  ReactiveFormsModule,
-  FormBuilder,
-  FormArray,
-  Validators,
-  FormGroup,
-} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 import { InvoiceService } from '../../../core/services/invoice.service';
+import { InvoiceDetail } from '../../../core/models/invoice.model';
+
+interface LineItemForm {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+}
 
 @Component({
   selector: 'app-invoice-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, CurrencyPipe],
+  imports: [CommonModule, FormsModule, CurrencyPipe, RouterLink],
   templateUrl: './invoice-form.component.html',
-  styleUrls: ['./invoice-form.component.scss'],
+  styleUrl: './invoice-form.component.scss',
 })
 export class InvoiceFormComponent implements OnInit {
-  form!: FormGroup;
-
+  isEdit = signal(false);
+  invoiceId = signal<string | null>(null);
   loading = signal(false);
-  errorMessage = signal('');
-  isEdit = false;
-  editId: string | null = null;
+  saving = signal(false);
+  error = signal('');
+
+  // Form fields
+  clientName = '';
+  clientEmail = '';
+  clientAddress = '';
+  dueDate = this.defaultDueDate();
+  notes = '';
+  lineItems = signal<LineItemForm[]>([
+    { description: '', quantity: 1, unitPrice: 0 },
+  ]);
+
+  subtotal = computed(() =>
+    this.lineItems().reduce((s, li) => s + li.quantity * li.unitPrice, 0),
+  );
 
   constructor(
-    private fb: FormBuilder,
     private invoiceService: InvoiceService,
-    private router: Router,
     private route: ActivatedRoute,
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
-    this.initializeForm();
-    this.editId = this.route.snapshot.paramMap.get('id');
-    this.isEdit = !!this.editId;
-    if (this.isEdit) {
-      this.invoiceService.getById(this.editId!).subscribe({
-        next: (inv) => {
-          this.form.patchValue({
-            clientName: inv.clientName,
-            clientEmail: inv.clientEmail,
-            clientAddress: inv.clientAddress ?? '',
-            dueDate: inv.dueDate.split('T')[0],
-            notes: inv.notes ?? '',
-          });
-          while (this.lineItems.length) this.lineItems.removeAt(0);
-          inv.lineItems.forEach((li) => {
-            this.lineItems.push(
-              this.fb.group({
-                description: [li.description, Validators.required],
-                quantity: [
-                  li.quantity,
-                  [Validators.required, Validators.min(1)],
-                ],
-                unitPrice: [
-                  li.unitPrice,
-                  [Validators.required, Validators.min(0)],
-                ],
-              }),
-            );
-          });
-        },
-        error: () => this.router.navigate(['/invoices']),
-      });
-    } else {
-      const due = new Date();
-      due.setDate(due.getDate() + 30);
-      this.form.patchValue({ dueDate: due.toISOString().split('T')[0] });
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id && id !== 'new') {
+      this.isEdit.set(true);
+      this.invoiceId.set(id);
+      this.loadInvoice(id);
     }
   }
 
-  get lineItems(): FormArray {
-    return this.form.get('lineItems') as FormArray;
-  }
-
-  initializeForm(): void {
-    this.form = this.fb.group({
-      clientName: ['', [Validators.required, Validators.maxLength(200)]],
-      clientEmail: ['', [Validators.required, Validators.email]],
-      clientAddress: [''],
-      dueDate: ['', Validators.required],
-      notes: [''],
-      lineItems: this.fb.array([this.createLineItemGroup()]),
-    });
-  }
-
-  createLineItemGroup(): FormGroup {
-    return this.fb.group({
-      description: ['', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-      unitPrice: [0, [Validators.required, Validators.min(0)]],
+  loadInvoice(id: string): void {
+    this.loading.set(true);
+    this.invoiceService.getById(id).subscribe({
+      next: (inv) => {
+        this.clientName = inv.clientName;
+        this.clientEmail = inv.clientEmail;
+        this.clientAddress = inv.clientAddress ?? '';
+        this.dueDate = inv.dueDate.split('T')[0];
+        this.notes = inv.notes ?? '';
+        this.lineItems.set(
+          inv.lineItems.map((li) => ({
+            description: li.description,
+            quantity: li.quantity,
+            unitPrice: li.unitPrice,
+          })),
+        );
+        this.loading.set(false);
+      },
+      error: () => {
+        this.error.set('Failed to load invoice.');
+        this.loading.set(false);
+      },
     });
   }
 
   addLineItem(): void {
-    this.lineItems.push(this.createLineItemGroup());
+    this.lineItems.update((items) => [
+      ...items,
+      { description: '', quantity: 1, unitPrice: 0 },
+    ]);
   }
 
-  removeLineItem(index: number): void {
-    this.lineItems.removeAt(index);
+  removeLineItem(i: number): void {
+    if (this.lineItems().length === 1) return;
+    this.lineItems.update((items) => items.filter((_, idx) => idx !== i));
   }
 
-  lineItemTotal(index: number): number {
-    const v = this.lineItems.at(index).value;
-    return (Number(v.quantity) || 0) * (Number(v.unitPrice) || 0);
+  updateLineItem(
+    i: number,
+    field: keyof LineItemForm,
+    value: string | number,
+  ): void {
+    this.lineItems.update((items) =>
+      items.map((li, idx) =>
+        idx === i
+          ? { ...li, [field]: field === 'description' ? value : Number(value) }
+          : li,
+      ),
+    );
   }
 
-  invoiceTotal(): number {
-    return this.lineItems.controls.reduce((s, c) => {
-      const v = c.value;
-      return s + (Number(v.quantity) || 0) * (Number(v.unitPrice) || 0);
-    }, 0);
+  lineTotal(li: LineItemForm): number {
+    return li.quantity * li.unitPrice;
   }
 
-  onSubmit(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
+  submit(): void {
+    this.error.set('');
+    if (!this.clientName.trim()) {
+      this.error.set('Client name is required.');
       return;
     }
-    this.loading.set(true);
-    this.errorMessage.set('');
+    if (!this.clientEmail.trim()) {
+      this.error.set('Client email is required.');
+      return;
+    }
+    if (!this.dueDate) {
+      this.error.set('Due date is required.');
+      return;
+    }
+
+    const hasInvalidItem = this.lineItems().some(
+      (li) => !li.description.trim() || li.quantity <= 0 || li.unitPrice <= 0,
+    );
+    if (hasInvalidItem) {
+      this.error.set(
+        'All line items must have a description, quantity > 0 and price > 0.',
+      );
+      return;
+    }
+
+    this.saving.set(true);
     const payload = {
-      clientName: this.form.value.clientName!,
-      clientEmail: this.form.value.clientEmail!,
-      clientAddress: this.form.value.clientAddress || undefined,
-      dueDate: this.form.value.dueDate!,
-      notes: this.form.value.notes || undefined,
-      lineItems: this.lineItems.value.map((li: any) => ({
-        description: li.description,
-        quantity: Number(li.quantity),
-        unitPrice: Number(li.unitPrice),
+      clientName: this.clientName.trim(),
+      clientEmail: this.clientEmail.trim(),
+      clientAddress: this.clientAddress.trim() || undefined,
+      dueDate: new Date(this.dueDate).toISOString(),
+      notes: this.notes.trim() || undefined,
+      lineItems: this.lineItems().map((li) => ({
+        description: li.description.trim(),
+        quantity: li.quantity,
+        unitPrice: li.unitPrice,
       })),
     };
-    const req: Observable<any> = this.isEdit
-      ? this.invoiceService.update(this.editId!, payload)
-      : this.invoiceService.create(payload);
-    req.subscribe({
-      next: () => this.router.navigate(['/invoices']),
-      error: (err: any) => {
-        this.loading.set(false);
-        this.errorMessage.set(err.error?.title || 'Failed to save invoice.');
+
+    const req$ = (
+      this.isEdit()
+        ? this.invoiceService.update(this.invoiceId()!, payload)
+        : this.invoiceService.create(payload)
+    ) as Observable<string>;
+
+    req$.subscribe({
+      next: (id: any) => {
+        this.saving.set(false);
+        this.router.navigate([
+          '/invoices',
+          this.isEdit() ? this.invoiceId() : id,
+        ]);
+      },
+      error: () => {
+        this.error.set('Failed to save invoice. Please try again.');
+        this.saving.set(false);
       },
     });
+  }
+
+  private defaultDueDate(): string {
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    return d.toISOString().split('T')[0];
   }
 }

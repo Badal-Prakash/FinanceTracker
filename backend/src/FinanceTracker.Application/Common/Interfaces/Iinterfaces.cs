@@ -1,7 +1,5 @@
 using FinanceTracker.Domain.Entities;
-using Microsoft.EntityFrameworkCore;        // ← this was missing
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace FinanceTracker.Application.Common.Interfaces;
 
@@ -15,6 +13,7 @@ public interface IApplicationDbContext
     DbSet<InvoiceLineItem> InvoiceLineItems { get; }
     DbSet<Budget> Budgets { get; }
     DbSet<Category> Categories { get; }
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 

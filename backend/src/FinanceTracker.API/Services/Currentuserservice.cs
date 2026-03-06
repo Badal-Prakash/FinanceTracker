@@ -17,7 +17,6 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            // ASP.NET Core JWT middleware maps "sub" → ClaimTypes.NameIdentifier
             var id = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                    ?? User?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
             return Guid.TryParse(id, out var guid) ? guid : Guid.Empty;

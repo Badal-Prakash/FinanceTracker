@@ -1,11 +1,12 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { InvoiceService } from '../../../core/services/invoice.service';
 import {
   InvoiceListItem,
   InvoiceStats,
+  InvoiceFilters,
 } from '../../../core/models/invoice.model';
 
 @Component({
@@ -13,20 +14,26 @@ import {
   standalone: true,
   imports: [CommonModule, CurrencyPipe, DatePipe, RouterLink, FormsModule],
   templateUrl: './invoice-list.component.html',
-  styleUrls: ['./invoice-list.component.scss'],
+  styleUrl: './invoice-list.component.scss',
 })
 export class InvoiceListComponent implements OnInit {
-  protected readonly Math = Math;
   invoices = signal<InvoiceListItem[]>([]);
   stats = signal<InvoiceStats | null>(null);
   loading = signal(true);
   totalCount = signal(0);
+  page = signal(1);
   totalPages = signal(1);
-  currentPage = signal(1);
-  readonly pageSize = 20;
-  filters = { status: '', clientName: '', fromDate: '', toDate: '' };
 
-  constructor(private invoiceService: InvoiceService) {}
+  filters: InvoiceFilters = { page: 1, pageSize: 20 };
+  search = '';
+  statusFilter = '';
+
+  readonly statuses = ['Unpaid', 'Paid', 'Overdue', 'Cancelled'];
+
+  constructor(
+    private invoiceService: InvoiceService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.loadStats();
@@ -34,75 +41,75 @@ export class InvoiceListComponent implements OnInit {
   }
 
   loadStats(): void {
-    this.invoiceService
-      .getStats()
-      .subscribe({ next: (s) => this.stats.set(s) });
+    this.invoiceService.getStats().subscribe({
+      next: (s) => this.stats.set(s),
+    });
   }
 
   loadList(): void {
     this.loading.set(true);
-    const active = Object.fromEntries(
-      Object.entries(this.filters).filter(([, v]) => v !== ''),
-    );
-    this.invoiceService
-      .getList({ page: this.currentPage(), pageSize: this.pageSize, ...active })
-      .subscribe({
-        next: (data) => {
-          this.invoices.set(data.items);
-          this.totalCount.set(data.totalCount);
-          this.totalPages.set(data.totalPages);
-          this.loading.set(false);
-        },
-        error: () => this.loading.set(false),
-      });
+    const f: InvoiceFilters = {
+      ...this.filters,
+      page: this.page(),
+      clientName: this.search || undefined,
+      status: this.statusFilter || undefined,
+    };
+    this.invoiceService.getList(f).subscribe({
+      next: (data) => {
+        this.invoices.set(data.items);
+        this.totalCount.set(data.totalCount);
+        this.totalPages.set(data.totalPages);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
   }
 
-  onFilterChange(): void {
-    this.currentPage.set(1);
+  onSearch(): void {
+    this.page.set(1);
     this.loadList();
   }
-
-  clearFilters(): void {
-    this.filters = { status: '', clientName: '', fromDate: '', toDate: '' };
-    this.onFilterChange();
-  }
-
-  changePage(page: number): void {
-    this.currentPage.set(page);
+  onFilter(): void {
+    this.page.set(1);
     this.loadList();
   }
-
-  hasActiveFilters(): boolean {
-    return !!(
-      this.filters.status ||
-      this.filters.clientName ||
-      this.filters.fromDate ||
-      this.filters.toDate
-    );
+  prevPage(): void {
+    if (this.page() > 1) {
+      this.page.update((p) => p - 1);
+      this.loadList();
+    }
+  }
+  nextPage(): void {
+    if (this.page() < this.totalPages()) {
+      this.page.update((p) => p + 1);
+      this.loadList();
+    }
   }
 
-  isOverdue(inv: InvoiceListItem): boolean {
-    return (
-      inv.status === 'Overdue' ||
-      (inv.status === 'Unpaid' && new Date(inv.dueDate) < new Date())
-    );
+  markPaid(id: string, e: Event): void {
+    e.stopPropagation();
+    this.invoiceService.markPaid(id).subscribe({ next: () => this.loadList() });
+  }
+
+  deleteInvoice(id: string, e: Event): void {
+    e.stopPropagation();
+    if (!confirm('Delete this invoice?')) return;
+    this.invoiceService.delete(id).subscribe({ next: () => this.loadList() });
   }
 
   statusClass(status: string): string {
-    const map: Record<string, string> = {
-      Draft: 'badge badge--draft',
-      Unpaid: 'badge badge--unpaid',
-      Paid: 'badge badge--paid',
-      Overdue: 'badge badge--overdue',
-      Cancelled: 'badge badge--cancelled',
+    const m: Record<string, string> = {
+      Unpaid: 'badge--unpaid',
+      Paid: 'badge--paid',
+      Overdue: 'badge--overdue',
+      Cancelled: 'badge--cancelled',
     };
-    return map[status] ?? 'badge';
+    return 'badge ' + (m[status] ?? '');
   }
 
-  paginationStart(): number {
-    return (this.currentPage() - 1) * this.pageSize + 1;
-  }
-  paginationEnd(): number {
-    return Math.min(this.currentPage() * this.pageSize, this.totalCount());
+  isOverdue(invoice: InvoiceListItem): boolean {
+    return (
+      invoice.status === 'Unpaid' && new Date(invoice.dueDate) < new Date()
+    );
   }
 }

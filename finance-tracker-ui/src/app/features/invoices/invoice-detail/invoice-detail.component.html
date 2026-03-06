@@ -1,6 +1,6 @@
-<div class="page">
+<div class="page no-print">
   <div class="page-header">
-    <a routerLink="/invoices" class="back-btn">
+    <a routerLink="/invoices" class="back-link">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           stroke-linecap="round"
@@ -9,23 +9,66 @@
           d="M15 19l-7-7 7-7"
         />
       </svg>
+      Invoices
     </a>
-    <div class="page-header__info">
-      <h1 class="page-header__title">
-        {{ invoice()?.invoiceNumber ?? "Loading..." }}
-      </h1>
-      <p class="page-header__subtitle">Invoice Details</p>
-    </div>
-    @if (
-      invoice() &&
-      invoice()!.status !== "Cancelled" &&
-      invoice()!.status !== "Paid"
-    ) {
-      <a
-        [routerLink]="['/invoices', invoice()!.id, 'edit']"
-        class="btn btn--outline btn--sm"
-        >Edit</a
-      >
+
+    @if (invoice()) {
+      <div class="header-actions">
+        <button (click)="printInvoice()" class="btn-outline">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"
+            />
+          </svg>
+          Print
+        </button>
+        @if (isEditable()) {
+          <a
+            [routerLink]="['/invoices', invoice()!.id, 'edit']"
+            class="btn-outline"
+          >
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+              />
+            </svg>
+            Edit
+          </a>
+          <button
+            (click)="markPaid()"
+            [disabled]="acting()"
+            class="btn-primary btn-primary--green"
+          >
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+            Mark as Paid
+          </button>
+          <button
+            (click)="cancel()"
+            [disabled]="acting()"
+            class="btn-danger-outline"
+          >
+            Cancel Invoice
+          </button>
+        }
+        @if (invoice()!.status !== "Paid") {
+          <button (click)="delete()" [disabled]="acting()" class="btn-danger">
+            Delete
+          </button>
+        }
+      </div>
     }
   </div>
 
@@ -33,214 +76,129 @@
     <div class="loading-state">
       <svg class="spinner" fill="none" viewBox="0 0 24 24">
         <circle
-          class="spinner__track"
           cx="12"
           cy="12"
           r="10"
           stroke="currentColor"
           stroke-width="4"
-        ></circle>
+          style="opacity: 0.25"
+        />
         <path
-          class="spinner__fill"
           fill="currentColor"
           d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-        ></path>
+          style="opacity: 0.75"
+        />
       </svg>
     </div>
   }
+</div>
 
-  @if (invoice()) {
-    <div [class]="bannerClass(invoice()!.status)">
-      <div class="banner__left">
+<!-- Invoice document — visible on screen and in print -->
+@if (!loading() && invoice()) {
+  <div class="invoice-doc">
+    <!-- Invoice Header -->
+    <div class="doc-header">
+      <div class="doc-brand">
+        <div class="doc-brand__icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+        <span class="doc-brand__name">FinanceTracker</span>
+      </div>
+      <div class="doc-meta">
+        <h1 class="doc-title">INVOICE</h1>
+        <p class="doc-number">{{ invoice()!.invoiceNumber }}</p>
         <span [class]="statusClass(invoice()!.status)">{{
           invoice()!.status
         }}</span>
-        @if (invoice()!.status === "Paid" && invoice()!.paidAt) {
-          <span class="banner__meta"
-            >Paid on {{ invoice()!.paidAt | date: "MMM d, y" }}</span
-          >
-        }
-        @if (isOverdue(invoice()!)) {
-          <span class="banner__meta banner__meta--danger"
-            >{{ daysOverdue(invoice()!) }} days overdue</span
-          >
-        }
       </div>
-      <span class="banner__amount">{{ invoice()!.amount | currency }}</span>
     </div>
 
-    <div class="card">
-      <h2 class="card__title">Client</h2>
-      <div class="detail-grid">
-        <div class="detail-item">
-          <p class="detail-item__label">Name</p>
-          <p class="detail-item__value">{{ invoice()!.clientName }}</p>
-        </div>
-        <div class="detail-item">
-          <p class="detail-item__label">Email</p>
-          <p class="detail-item__value">{{ invoice()!.clientEmail }}</p>
-        </div>
-        <div class="detail-item">
-          <p class="detail-item__label">Due Date</p>
-          <p
-            [class]="
-              isOverdue(invoice()!)
-                ? 'detail-item__value detail-item__value--danger'
-                : 'detail-item__value'
-            "
-          >
-            {{ invoice()!.dueDate | date: "MMM d, y" }}
-          </p>
-        </div>
-        <div class="detail-item">
-          <p class="detail-item__label">Created</p>
-          <p class="detail-item__value">
-            {{ invoice()!.createdAt | date: "MMM d, y" }}
-          </p>
-        </div>
+    <!-- Addresses -->
+    <div class="doc-parties">
+      <div class="doc-party">
+        <p class="doc-party__label">From</p>
+        <p class="doc-party__name">FinanceTracker Inc.</p>
+        <p class="doc-party__detail">billing&#64;financetracker.com</p>
+      </div>
+      <div class="doc-party doc-party--right">
+        <p class="doc-party__label">Bill To</p>
+        <p class="doc-party__name">{{ invoice()!.clientName }}</p>
+        <p class="doc-party__detail">{{ invoice()!.clientEmail }}</p>
         @if (invoice()!.clientAddress) {
-          <div class="detail-item detail-item--full">
-            <p class="detail-item__label">Billing Address</p>
-            <p class="detail-item__value">{{ invoice()!.clientAddress }}</p>
-          </div>
-        }
-        @if (invoice()!.notes) {
-          <div class="detail-item detail-item--full">
-            <p class="detail-item__label">Notes</p>
-            <p class="detail-item__value detail-item__value--notes">
-              {{ invoice()!.notes }}
-            </p>
-          </div>
+          <p class="doc-party__detail doc-party__address">
+            {{ invoice()!.clientAddress }}
+          </p>
         }
       </div>
     </div>
 
-    <div class="card card--no-padding">
-      <div class="card-header">
-        <h2 class="card__title">Line Items</h2>
+    <!-- Dates -->
+    <div class="doc-dates">
+      <div class="doc-date-item">
+        <span class="doc-date-item__label">Invoice Date</span>
+        <span class="doc-date-item__value">{{
+          invoice()!.createdAt | date: "MMM d, y"
+        }}</span>
       </div>
-      <table class="table">
-        <thead class="table__head">
-          <tr>
-            <th class="table__th">Description</th>
-            <th class="table__th table__th--center">Qty</th>
-            <th class="table__th table__th--right">Unit Price</th>
-            <th class="table__th table__th--right">Total</th>
-          </tr>
-        </thead>
-        <tbody class="table__body">
-          @for (li of invoice()!.lineItems; track li.id) {
-            <tr class="table__row">
-              <td class="table__td">{{ li.description }}</td>
-              <td class="table__td table__td--center">{{ li.quantity }}</td>
-              <td class="table__td table__td--right">
-                {{ li.unitPrice | currency }}
-              </td>
-              <td class="table__td table__td--right">
-                {{ lineTotal(li.quantity, li.unitPrice) | currency }}
-              </td>
-            </tr>
-          }
-        </tbody>
-        <tfoot class="table__foot">
-          <tr>
-            <td colspan="3" class="table__td table__td--total-label">Total</td>
-            <td class="table__td table__td--total-value">
-              {{ invoice()!.amount | currency }}
-            </td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-
-    @if (canAct()) {
-      <div class="card">
-        <h2 class="card__title">Actions</h2>
-        <div class="actions">
-          @if (invoice()!.status === "Draft") {
-            <button
-              (click)="sendInvoice()"
-              [disabled]="actionLoading()"
-              class="btn btn--primary"
-            >
-              <svg
-                class="btn__icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                />
-              </svg>
-              Send to Client
-            </button>
-          }
-
-          @if (
-            invoice()!.status === "Unpaid" || invoice()!.status === "Overdue"
-          ) {
-            <button
-              (click)="markPaid()"
-              [disabled]="actionLoading()"
-              class="btn btn--success"
-            >
-              <svg
-                class="btn__icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              Mark as Paid
-            </button>
-          }
-
-          @if (
-            invoice()!.status !== "Paid" && invoice()!.status !== "Cancelled"
-          ) {
-            <button
-              (click)="cancelInvoice()"
-              [disabled]="actionLoading()"
-              class="btn btn--danger-outline"
-            >
-              Cancel Invoice
-            </button>
-          }
-
-          @if (canDelete() && invoice()!.status !== "Paid") {
-            <button
-              (click)="deleteInvoice()"
-              [disabled]="actionLoading()"
-              class="btn btn--ghost btn--delete"
-            >
-              <svg
-                class="btn__icon"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
-              Delete
-            </button>
-          }
+      <div class="doc-date-item">
+        <span class="doc-date-item__label">Due Date</span>
+        <span class="doc-date-item__value">{{
+          invoice()!.dueDate | date: "MMM d, y"
+        }}</span>
+      </div>
+      @if (invoice()!.paidAt) {
+        <div class="doc-date-item">
+          <span class="doc-date-item__label">Paid On</span>
+          <span class="doc-date-item__value doc-date-item__value--green">{{
+            invoice()!.paidAt | date: "MMM d, y"
+          }}</span>
         </div>
+      }
+    </div>
+
+    <!-- Line Items -->
+    <table class="doc-table">
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th class="right">Qty</th>
+          <th class="right">Unit Price</th>
+          <th class="right">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (li of invoice()!.lineItems; track li.id) {
+          <tr>
+            <td>{{ li.description }}</td>
+            <td class="right">{{ li.quantity }}</td>
+            <td class="right">{{ li.unitPrice | currency }}</td>
+            <td class="right">{{ li.total | currency }}</td>
+          </tr>
+        }
+        <tr class="total-row">
+          <td colspan="3" class="right"><strong>Total Due</strong></td>
+          <td class="right">
+            <strong>{{ invoice()!.amount | currency }}</strong>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Notes -->
+    @if (invoice()!.notes) {
+      <div class="doc-notes">
+        <p class="doc-notes__label">Notes</p>
+        <p class="doc-notes__text">{{ invoice()!.notes }}</p>
       </div>
     }
-  }
-</div>
+
+    <p class="doc-footer">Thank you for your business.</p>
+  </div>
+}

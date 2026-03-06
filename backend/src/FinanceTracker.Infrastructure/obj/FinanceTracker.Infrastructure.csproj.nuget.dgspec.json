@@ -78,7 +78,7 @@
             },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
-              "version": "[7.0.18, )"
+              "version": "[9.0.0, )"
             }
           },
           "imports": [
@@ -151,7 +151,7 @@
             },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
-              "version": "[7.0.18, )"
+              "version": "[9.0.0, )"
             }
           },
           "imports": [
@@ -249,11 +249,15 @@
             },
             "Microsoft.Extensions.Configuration.Abstractions": {
               "target": "Package",
-              "version": "[9.0.1, )"
+              "version": "[11.0.0-preview.1.26104.118, )"
             },
             "Microsoft.Extensions.Configuration.Json": {
               "target": "Package",
               "version": "[9.0.1, )"
+            },
+            "Microsoft.Extensions.Options.ConfigurationExtensions": {
+              "target": "Package",
+              "version": "[11.0.0-preview.1.26104.118, )"
             },
             "Microsoft.IdentityModel.Tokens": {
               "target": "Package",
@@ -261,7 +265,7 @@
             },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
-              "version": "[9.0.3, )"
+              "version": "[9.0.0, )"
             },
             "System.IdentityModel.Tokens.Jwt": {
               "target": "Package",

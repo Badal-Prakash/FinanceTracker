@@ -2,6 +2,7 @@ using FinanceTracker.API.Middleware;
 using FinanceTracker.API.Services;
 using FinanceTracker.Application;
 using FinanceTracker.Application.Common.Interfaces;
+using FinanceTracker.Application.Common.Models;
 using FinanceTracker.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -12,27 +13,27 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-
-// ─── Services ────────────────────────────────────────────────────────────────
+DotNetEnv.Env.Load();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 
-// Clean Architecture layers
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-// Current User Service (reads JWT claims)
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-// CORS for Angular
+builder.Services.Configure<SecuritySettings>(options =>
+{
+    options.AzureStorage = Environment.GetEnvironmentVariable("AzureStorage::ConnectionString") ?? string.Empty;
+});
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AngularApp", policy =>
     {
         policy.WithOrigins(
-            "http://localhost:4200",                       // local dev
-            "https://finance-tracker-opal-tau.vercel.app"  // Vercel frontend
+            "http://localhost:4200",
+            "https://finance-tracker-opal-tau.vercel.app"
         )
         .AllowAnyHeader()
         .AllowAnyMethod()
@@ -60,7 +61,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
-// Swagger with JWT support
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "FinanceTracker API", Version = "v1" });
@@ -85,7 +85,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// ─── App ──────────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -99,6 +98,4 @@ app.UseCors("AngularApp");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
-// var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-// app.Run($"http://0.0.0.0:{port}");
 app.Run();

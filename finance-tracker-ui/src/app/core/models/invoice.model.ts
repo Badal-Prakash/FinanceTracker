@@ -15,6 +15,7 @@ export interface InvoiceListItem {
   status: 'Draft' | 'Unpaid' | 'Paid' | 'Overdue' | 'Cancelled';
   paidAt?: string;
   createdAt: string;
+  clientEmail: string;
 }
 
 export interface InvoiceDetail {

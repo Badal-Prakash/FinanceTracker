@@ -1,6 +1,6 @@
 <div class="page">
   <div class="page-header">
-    <a routerLink="/invoices" class="back-btn">
+    <a routerLink="/invoices" class="back-link">
       <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           stroke-linecap="round"
@@ -9,194 +9,201 @@
           d="M15 19l-7-7 7-7"
         />
       </svg>
+      Invoices
     </a>
-    <div>
-      <h1 class="page-header__title">
-        {{ isEdit ? "Edit Invoice" : "New Invoice" }}
-      </h1>
-      <p class="page-header__subtitle">
-        {{
-          isEdit
-            ? "Update invoice details"
-            : "Create a new invoice for a client"
-        }}
-      </p>
-    </div>
+    <h1 class="page-title">{{ isEdit() ? "Edit Invoice" : "New Invoice" }}</h1>
   </div>
 
-  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form">
-    @if (errorMessage()) {
-      <div class="alert alert--error">{{ errorMessage() }}</div>
-    }
-
-    <div class="card">
-      <h2 class="card__title">Client Details</h2>
-      <div class="form-grid">
-        <div class="form-field">
-          <label class="form-label">Client Name *</label>
-          <input
-            type="text"
-            formControlName="clientName"
-            class="form-input"
-            placeholder="Acme Corp"
-          />
-          @if (
-            form.get("clientName")?.invalid && form.get("clientName")?.touched
-          ) {
-            <p class="form-error">Client name is required</p>
-          }
-        </div>
-        <div class="form-field">
-          <label class="form-label">Client Email *</label>
-          <input
-            type="email"
-            formControlName="clientEmail"
-            class="form-input"
-            placeholder="billing@acme.com"
-          />
-          @if (
-            form.get("clientEmail")?.invalid && form.get("clientEmail")?.touched
-          ) {
-            <p class="form-error">Valid email is required</p>
-          }
-        </div>
-        <div class="form-field">
-          <label class="form-label">Due Date *</label>
-          <input type="date" formControlName="dueDate" class="form-input" />
-          @if (form.get("dueDate")?.invalid && form.get("dueDate")?.touched) {
-            <p class="form-error">Due date is required</p>
-          }
-        </div>
-        <div class="form-field">
-          <label class="form-label">Billing Address</label>
-          <input
-            type="text"
-            formControlName="clientAddress"
-            class="form-input"
-            placeholder="123 Main St, New York"
-          />
-        </div>
-      </div>
-      <div class="form-field form-field--full">
-        <label class="form-label">Notes</label>
-        <textarea
-          formControlName="notes"
-          rows="2"
-          class="form-textarea"
-          placeholder="Payment terms, bank details, etc."
-        ></textarea>
-      </div>
+  @if (loading()) {
+    <div class="loading-state">
+      <svg class="spinner" fill="none" viewBox="0 0 24 24">
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+          style="opacity: 0.25"
+        />
+        <path
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          style="opacity: 0.75"
+        />
+      </svg>
     </div>
-
-    <div class="card">
-      <div class="line-items-header">
-        <h2 class="card__title">Line Items</h2>
-        <button type="button" (click)="addLineItem()" class="btn-add">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M12 4v16m8-8H4"
+  } @else {
+    <div class="form-grid">
+      <!-- Left: Client + Details -->
+      <div class="form-col">
+        <div class="card">
+          <h2 class="card__title">Client Details</h2>
+          <div class="field">
+            <label class="label">Client Name <span class="req">*</span></label>
+            <input
+              type="text"
+              [(ngModel)]="clientName"
+              class="input"
+              placeholder="Acme Corporation"
             />
-          </svg>
-          Add Item
-        </button>
+          </div>
+          <div class="field">
+            <label class="label">Client Email <span class="req">*</span></label>
+            <input
+              type="email"
+              [(ngModel)]="clientEmail"
+              class="input"
+              placeholder="billing@acme.com"
+            />
+          </div>
+          <div class="field">
+            <label class="label">Client Address</label>
+            <textarea
+              [(ngModel)]="clientAddress"
+              class="input textarea"
+              rows="3"
+              placeholder="123 Main St, New York, NY 10001"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2 class="card__title">Invoice Details</h2>
+          <div class="field">
+            <label class="label">Due Date <span class="req">*</span></label>
+            <input type="date" [(ngModel)]="dueDate" class="input" />
+          </div>
+          <div class="field">
+            <label class="label">Notes</label>
+            <textarea
+              [(ngModel)]="notes"
+              class="input textarea"
+              rows="3"
+              placeholder="Payment terms, bank details, etc."
+            ></textarea>
+          </div>
+        </div>
       </div>
-      <div class="line-items-col-header">
-        <span class="col-description">Description</span>
-        <span class="col-qty">Qty</span>
-        <span class="col-price">Unit Price</span>
-        <span class="col-total">Total</span>
-        <span class="col-action"></span>
-      </div>
-      <div formArrayName="lineItems" class="line-items-list">
-        @for (item of lineItems.controls; track $index; let i = $index) {
-          <div [formGroupName]="i" class="line-item">
-            <div class="col-description">
+
+      <!-- Right: Line Items -->
+      <div class="form-col form-col--wide">
+        <div class="card">
+          <div class="card__header">
+            <h2 class="card__title">Line Items</h2>
+            <button (click)="addLineItem()" class="btn-add-item">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              Add Item
+            </button>
+          </div>
+
+          <div class="line-items-header">
+            <span class="li-col li-col--desc">Description</span>
+            <span class="li-col li-col--qty">Qty</span>
+            <span class="li-col li-col--price">Unit Price</span>
+            <span class="li-col li-col--total">Total</span>
+            <span class="li-col li-col--action"></span>
+          </div>
+
+          @for (li of lineItems(); track $index; let i = $index) {
+            <div class="line-item">
               <input
                 type="text"
-                formControlName="description"
-                class="form-input"
-                placeholder="Service or product"
+                [ngModel]="li.description"
+                (ngModelChange)="updateLineItem(i, 'description', $event)"
+                class="input li-col li-col--desc"
+                placeholder="Service or product description"
               />
-            </div>
-            <div class="col-qty">
               <input
                 type="number"
-                formControlName="quantity"
+                [ngModel]="li.quantity"
                 min="1"
-                class="form-input form-input--center"
-                placeholder="1"
+                (ngModelChange)="updateLineItem(i, 'quantity', $event)"
+                class="input li-col li-col--qty"
               />
+              <input
+                type="number"
+                [ngModel]="li.unitPrice"
+                min="0"
+                step="0.01"
+                (ngModelChange)="updateLineItem(i, 'unitPrice', $event)"
+                class="input li-col li-col--price"
+                placeholder="0.00"
+              />
+              <span class="li-col li-col--total li-total">{{
+                lineTotal(li) | currency
+              }}</span>
+              <button
+                (click)="removeLineItem(i)"
+                class="li-remove"
+                [disabled]="lineItems().length === 1"
+                title="Remove"
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
             </div>
-            <div class="col-price">
-              <div class="input-prefix">
-                <span class="input-prefix__symbol">$</span>
-                <input
-                  type="number"
-                  formControlName="unitPrice"
-                  step="0.01"
-                  min="0"
-                  class="form-input form-input--right form-input--prefixed"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-            <div class="col-total">
-              <span class="line-total">{{ lineItemTotal(i) | currency }}</span>
-            </div>
-            <div class="col-action">
-              @if (lineItems.length > 1) {
-                <button
-                  type="button"
-                  (click)="removeLineItem(i)"
-                  class="btn-remove"
-                >
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              }
-            </div>
+          }
+
+          <div class="subtotal-row">
+            <span class="subtotal-label">Total</span>
+            <span class="subtotal-value">{{ subtotal() | currency }}</span>
+          </div>
+        </div>
+
+        <!-- Error + Submit -->
+        @if (error()) {
+          <div class="error-banner">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {{ error() }}
           </div>
         }
-      </div>
-      <div class="invoice-total">
-        <span class="invoice-total__label">Invoice Total</span>
-        <span class="invoice-total__value">{{
-          invoiceTotal() | currency
-        }}</span>
-      </div>
-    </div>
 
-    <div class="form-actions">
-      <a routerLink="/invoices" class="btn btn--secondary">Cancel</a>
-      <button type="submit" [disabled]="loading()" class="btn btn--primary">
-        @if (loading()) {
-          <svg class="spinner" fill="none" viewBox="0 0 24 24">
-            <circle
-              class="spinner__track"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            ></circle>
-            <path
-              class="spinner__fill"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-            ></path>
-          </svg>
-        }
-        {{ isEdit ? "Save Changes" : "Create Invoice" }}
-      </button>
+        <div class="form-actions">
+          <a routerLink="/invoices" class="btn-cancel">Cancel</a>
+          <button (click)="submit()" [disabled]="saving()" class="btn-save">
+            @if (saving()) {
+              <svg class="spinner-sm" fill="none" viewBox="0 0 24 24">
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                  style="opacity: 0.25"
+                />
+                <path
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                  style="opacity: 0.75"
+                />
+              </svg>
+              Saving...
+            } @else {
+              {{ isEdit() ? "Save Changes" : "Create Invoice" }}
+            }
+          </button>
+        </div>
+      </div>
     </div>
-  </form>
+  }
 </div>

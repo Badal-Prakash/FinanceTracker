@@ -1,19 +1,12 @@
 <div class="page">
-  <!-- Page Header -->
+  <!-- Header -->
   <div class="page-header">
-    <div class="page-header__text">
+    <div>
       <h1 class="page-header__title">Invoices</h1>
-      <p class="page-header__subtitle">
-        Manage client invoices and track payments
-      </p>
+      <p class="page-header__subtitle">Track and manage client invoices</p>
     </div>
-    <a routerLink="/invoices/new" class="btn btn--primary">
-      <svg
-        class="btn__icon"
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
+    <a routerLink="/invoices/new" class="btn-primary">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path
           stroke-linecap="round"
           stroke-linejoin="round"
@@ -25,116 +18,100 @@
     </a>
   </div>
 
-  <!-- Stats Cards -->
+  <!-- Stats -->
   @if (stats()) {
     <div class="stats-grid">
-      <div class="stat-card">
-        <p class="stat-card__label">Outstanding</p>
+      <div class="stat-card stat-card--blue">
+        <p class="stat-card__label">Total Unpaid</p>
         <p class="stat-card__value">{{ stats()!.totalUnpaid | currency }}</p>
-        <p class="stat-card__sub">{{ stats()!.unpaidCount }} unpaid invoices</p>
-      </div>
-      <div class="stat-card stat-card--danger">
-        <p class="stat-card__label">Overdue</p>
-        <p class="stat-card__value stat-card__value--danger">
-          {{ stats()!.totalOverdue | currency }}
-        </p>
         <p class="stat-card__sub">
-          {{ stats()!.overdueCount }} invoices overdue
+          {{ stats()!.unpaidCount }} invoice{{
+            stats()!.unpaidCount !== 1 ? "s" : ""
+          }}
         </p>
       </div>
-      <div class="stat-card stat-card--success">
+      <div class="stat-card stat-card--red">
+        <p class="stat-card__label">Overdue</p>
+        <p class="stat-card__value">{{ stats()!.totalOverdue | currency }}</p>
+        <p class="stat-card__sub">
+          {{ stats()!.overdueCount }} invoice{{
+            stats()!.overdueCount !== 1 ? "s" : ""
+          }}
+        </p>
+      </div>
+      <div class="stat-card stat-card--green">
         <p class="stat-card__label">Paid This Month</p>
-        <p class="stat-card__value stat-card__value--success">
+        <p class="stat-card__value">
           {{ stats()!.totalPaidThisMonth | currency }}
         </p>
         <p class="stat-card__sub">
-          {{ stats()!.paidThisMonthCount }} invoices paid
+          {{ stats()!.paidThisMonthCount }} invoice{{
+            stats()!.paidThisMonthCount !== 1 ? "s" : ""
+          }}
         </p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-card__label">Total Invoices</p>
-        <p class="stat-card__value">{{ totalCount() }}</p>
-        <p class="stat-card__sub">all time</p>
       </div>
     </div>
   }
 
   <!-- Filters -->
-  <div class="filter-bar">
-    <input
-      type="text"
-      [(ngModel)]="filters.clientName"
-      (ngModelChange)="onFilterChange()"
-      placeholder="Search client..."
-      class="filter-input"
-    />
-
+  <div class="filters">
+    <div class="search-wrap">
+      <svg
+        class="search-icon"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
+      </svg>
+      <input
+        type="text"
+        [(ngModel)]="search"
+        (ngModelChange)="onSearch()"
+        placeholder="Search client name..."
+        class="search-input"
+      />
+    </div>
     <select
-      [(ngModel)]="filters.status"
-      (ngModelChange)="onFilterChange()"
+      [(ngModel)]="statusFilter"
+      (ngModelChange)="onFilter()"
       class="filter-select"
     >
       <option value="">All Statuses</option>
-      <option value="Draft">Draft</option>
-      <option value="Unpaid">Unpaid</option>
-      <option value="Paid">Paid</option>
-      <option value="Overdue">Overdue</option>
-      <option value="Cancelled">Cancelled</option>
+      @for (s of statuses; track s) {
+        <option [value]="s">{{ s }}</option>
+      }
     </select>
-
-    <div class="filter-date-group">
-      <label class="filter-date-label">From</label>
-      <input
-        type="date"
-        [(ngModel)]="filters.fromDate"
-        (ngModelChange)="onFilterChange()"
-        class="filter-input filter-input--date"
-      />
-    </div>
-
-    <div class="filter-date-group">
-      <label class="filter-date-label">To</label>
-      <input
-        type="date"
-        [(ngModel)]="filters.toDate"
-        (ngModelChange)="onFilterChange()"
-        class="filter-input filter-input--date"
-      />
-    </div>
-
-    @if (hasActiveFilters()) {
-      <button (click)="clearFilters()" class="btn-clear">Clear filters</button>
-    }
   </div>
 
   <!-- Table -->
   <div class="table-card">
     @if (loading()) {
-      <div class="table-empty">
+      <div class="loading-state">
         <svg class="spinner" fill="none" viewBox="0 0 24 24">
           <circle
-            class="spinner__track"
             cx="12"
             cy="12"
             r="10"
             stroke="currentColor"
             stroke-width="4"
-          ></circle>
+            style="opacity: 0.25"
+          />
           <path
-            class="spinner__fill"
             fill="currentColor"
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-          ></path>
+            style="opacity: 0.75"
+          />
         </svg>
       </div>
     } @else if (invoices().length === 0) {
-      <div class="table-empty">
-        <svg
-          class="table-empty__icon"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
+      <div class="empty-state">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -142,51 +119,94 @@
             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
           />
         </svg>
-        <p class="table-empty__text">No invoices found</p>
-        <a routerLink="/invoices/new" class="table-empty__link"
-          >Create your first invoice</a
-        >
+        <p>No invoices found</p>
+        <a routerLink="/invoices/new">Create your first invoice →</a>
       </div>
     } @else {
       <table class="table">
-        <thead class="table__head">
+        <thead>
           <tr>
-            <th class="table__th">Invoice #</th>
-            <th class="table__th">Client</th>
-            <th class="table__th">Amount</th>
-            <th class="table__th">Due Date</th>
-            <th class="table__th">Status</th>
-            <th class="table__th table__th--right">Actions</th>
+            <th>Invoice #</th>
+            <th>Client</th>
+            <th>Amount</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th class="actions-col">Actions</th>
           </tr>
         </thead>
-        <tbody class="table__body">
+        <tbody>
           @for (inv of invoices(); track inv.id) {
-            <tr class="table__row">
-              <td class="table__td">
-                <span class="invoice-number">{{ inv.invoiceNumber }}</span>
+            <tr
+              [class.row--overdue]="isOverdue(inv)"
+              [routerLink]="['/invoices', inv.id]"
+              class="table-row"
+            >
+              <td class="inv-number">{{ inv.invoiceNumber }}</td>
+              <td>
+                <p class="client-name">{{ inv.clientName }}</p>
+                <p class="client-email">{{ inv.clientEmail }}</p>
               </td>
-              <td class="table__td">
-                <span class="client-name">{{ inv.clientName }}</span>
+              <td class="amount">{{ inv.amount | currency }}</td>
+              <td [class.due-overdue]="isOverdue(inv)">
+                {{ inv.dueDate | date: "MMM d, y" }}
+                @if (isOverdue(inv)) {
+                  <span class="overdue-tag">Overdue</span>
+                }
               </td>
-              <td class="table__td">
-                <span class="amount">{{ inv.amount | currency }}</span>
-              </td>
-              <td class="table__td">
-                <span
-                  [class]="
-                    isOverdue(inv) ? 'due-date due-date--overdue' : 'due-date'
-                  "
-                >
-                  {{ inv.dueDate | date: "MMM d, y" }}
-                </span>
-              </td>
-              <td class="table__td">
+              <td>
                 <span [class]="statusClass(inv.status)">{{ inv.status }}</span>
               </td>
-              <td class="table__td table__td--right">
-                <a [routerLink]="['/invoices', inv.id]" class="action-link"
-                  >View</a
-                >
+              <td class="actions-col" (click)="$event.stopPropagation()">
+                <div class="actions">
+                  @if (inv.status === "Unpaid" || inv.status === "Overdue") {
+                    <button
+                      (click)="markPaid(inv.id, $event)"
+                      class="action-btn action-btn--pay"
+                      title="Mark as Paid"
+                    >
+                      <svg
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </button>
+                  }
+                  <a
+                    [routerLink]="['/invoices', inv.id, 'edit']"
+                    class="action-btn action-btn--edit"
+                    title="Edit"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  </a>
+                  <button
+                    (click)="deleteInvoice(inv.id, $event)"
+                    class="action-btn action-btn--delete"
+                    title="Delete"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
               </td>
             </tr>
           }
@@ -196,27 +216,29 @@
       <!-- Pagination -->
       @if (totalPages() > 1) {
         <div class="pagination">
-          <p class="pagination__info">
-            Showing {{ paginationStart() }}–{{ paginationEnd() }} of
-            {{ totalCount() }}
-          </p>
-          <div class="pagination__controls">
+          <span class="pagination__info">
+            {{ (page() - 1) * 20 + 1 }}–{{
+              [page() * 20, totalCount()].sort()[0]
+            }}
+            of {{ totalCount() }}
+          </span>
+          <div class="pagination__btns">
             <button
-              (click)="changePage(currentPage() - 1)"
-              [disabled]="currentPage() === 1"
-              class="pagination__btn"
+              (click)="prevPage()"
+              [disabled]="page() === 1"
+              class="page-btn"
             >
-              Previous
+              ← Prev
             </button>
-            <span class="pagination__current"
-              >{{ currentPage() }} / {{ totalPages() }}</span
+            <span class="page-indicator"
+              >{{ page() }} / {{ totalPages() }}</span
             >
             <button
-              (click)="changePage(currentPage() + 1)"
-              [disabled]="currentPage() === totalPages()"
-              class="pagination__btn"
+              (click)="nextPage()"
+              [disabled]="page() === totalPages()"
+              class="page-btn"
             >
-              Next
+              Next →
             </button>
           </div>
         </div>
