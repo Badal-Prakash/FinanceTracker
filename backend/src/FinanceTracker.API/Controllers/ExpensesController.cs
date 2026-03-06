@@ -18,6 +18,8 @@ namespace FinanceTracker.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
+    // ─── Expenses Controller ──────────────────────────────────────────────────────
+    [Authorize]
     public class ExpensesController : BaseController
     {
         [HttpGet]
@@ -65,6 +67,27 @@ namespace FinanceTracker.API.Controllers
             await Mediator.Send(new DeleteExpenseCommand(id));
             return NoContent();
         }
+
+        // ── Import ────────────────────────────────────────────────────────────────
+        [HttpGet("import/template")]
+        public async Task<IActionResult> GetImportTemplate()
+        {
+            var bytes = await Mediator.Send(new GetImportTemplateQuery());
+            return File(bytes, "text/csv", "expense-import-template.csv");
+        }
+
+        [HttpPost("import/preview")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<ImportPreviewDto>> PreviewImport(IFormFile file)
+            => Ok(await Mediator.Send(new PreviewImportCommand(file)));
+
+        [HttpPost("import")]
+        [Consumes("multipart/form-data")]
+        public async Task<ActionResult<ImportResultDto>> Import(
+            IFormFile file,
+            [FromForm] bool submitAfterImport = false,
+            [FromForm] bool skipErrors = true)
+            => Ok(await Mediator.Send(new ImportExpensesCommand(file, submitAfterImport, skipErrors)));
     }
 
     // Body record for reject (decouples route id from command)

@@ -1,136 +1,176 @@
 import {
   Component,
+  signal,
+  computed,
   EventEmitter,
   Output,
-  signal,
-  ViewChild,
-  ElementRef,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, CurrencyPipe, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 
-interface ImportPreviewRow {
+interface ImportRow {
+  rowNumber: number;
   title: string;
+  description: string;
   amount: number;
   expenseDate: string;
-  categoryName: string;
-  description?: string;
+  category: string;
   isValid: boolean;
-  errors?: string[];
+  error?: string;
 }
+
+interface ImportPreview {
+  rows: ImportRow[];
+  validCount: number;
+  errorCount: number;
+  availableCategories: string[];
+}
+
+interface ImportResult {
+  imported: number;
+  skipped: number;
+  errors: string[];
+}
+
+type Step = 'upload' | 'preview' | 'done';
 
 @Component({
   selector: 'app-expense-import',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, CurrencyPipe, DatePipe],
   templateUrl: './expense-import.component.html',
   styleUrl: './expense-import.component.scss',
 })
 export class ExpenseImportComponent {
-  @Output() closed = new EventEmitter<boolean>();
-  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+  @Output() closed = new EventEmitter<boolean>(); // true = imported successfully
 
-  loading = signal(false);
+  step = signal<Step>('upload');
+  dragging = signal(false);
+  uploading = signal(false);
   importing = signal(false);
-  previewData = signal<ImportPreviewRow[]>([]);
-  error = signal<string | null>(null);
-  file = signal<File | null>(null);
+  preview = signal<ImportPreview | null>(null);
+  result = signal<ImportResult | null>(null);
+  error = signal('');
+  submitAfterImport = false;
+  skipErrors = true;
+  selectedFile: File | null = null;
 
-  constructor(private http: HttpClient) {}
+  showOnlyErrors = signal(false);
 
-  close(): void {
-    this.closed.emit(false);
+  visibleRows = computed(() => {
+    const rows = this.preview()?.rows ?? [];
+    return this.showOnlyErrors() ? rows.filter((r) => !r.isValid) : rows;
+  });
+
+  private readonly api = `${environment.apiUrl}/expenses`;
+
+  onDragOver(e: DragEvent) {
+    e.preventDefault();
+    this.dragging.set(true);
+  }
+  onDragLeave() {
+    this.dragging.set(false);
+  }
+  onDrop(e: DragEvent) {
+    e.preventDefault();
+    this.dragging.set(false);
+    const f = e.dataTransfer?.files[0];
+    if (f) this.handleFile(f);
+  }
+  onFileSelect(e: Event) {
+    const f = (e.target as HTMLInputElement).files?.[0];
+    if (f) this.handleFile(f);
   }
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.handleFile(input.files[0]);
-    }
-  }
-
-  onFileDropped(event: DragEvent): void {
-    event.preventDefault();
-    if (event.dataTransfer?.files && event.dataTransfer.files.length > 0) {
-      this.handleFile(event.dataTransfer.files[0]);
-    }
-  }
-
-  private handleFile(file: File): void {
+  handleFile(file: File): void {
     const ext = file.name.split('.').pop()?.toLowerCase();
-    if (ext !== 'csv' && ext !== 'xlsx') {
-      this.error.set('Please upload a .csv or .xlsx file.');
+    if (!['csv', 'xlsx'].includes(ext ?? '')) {
+      this.error.set('Only CSV and Excel (.xlsx) files are supported.');
       return;
     }
-    this.file.set(file);
-    this.uploadForPreview(file);
+    this.error.set('');
+    this.selectedFile = file;
+    this.uploadForPreview();
   }
 
-  uploadForPreview(file: File): void {
-    this.loading.set(true);
-    this.error.set(null);
+  uploadForPreview(): void {
+    if (!this.selectedFile) return;
+    this.uploading.set(true);
+    this.error.set('');
 
-    const formData = new FormData();
-    formData.append('file', file);
+    const form = new FormData();
+    form.append('file', this.selectedFile);
 
     this.http
-      .post<
-        ImportPreviewRow[]
-      >(`${environment.apiUrl}/expenses/import/preview`, formData)
+      .post<ImportPreview>(`${this.api}/import/preview`, form)
       .subscribe({
         next: (data) => {
-          this.previewData.set(data);
-          this.loading.set(false);
+          this.preview.set(data);
+          this.step.set('preview');
+          this.uploading.set(false);
         },
         error: (err) => {
-          const message =
-            err.error?.message ||
-            (typeof err.error === 'string' ? err.error : null) ||
-            'Failed to preview file. Please check the file format and try again.';
-          this.error.set(message);
-          this.loading.set(false);
+          this.error.set(
+            err?.error?.message ??
+              'Failed to parse file. Check the format and try again.',
+          );
+          this.uploading.set(false);
         },
       });
   }
 
   confirmImport(): void {
-    if (!this.file()) return;
+    if (!this.selectedFile) return;
     this.importing.set(true);
-    this.error.set(null);
-    const formData = new FormData();
-    formData.append('file', this.file()!);
 
+    const form = new FormData();
+    form.append('file', this.selectedFile);
+    form.append('submitAfterImport', String(this.submitAfterImport));
+    form.append('skipErrors', String(this.skipErrors));
+
+    this.http.post<ImportResult>(`${this.api}/import`, form).subscribe({
+      next: (res) => {
+        this.result.set(res);
+        this.step.set('done');
+        this.importing.set(false);
+      },
+      error: (err) => {
+        this.error.set(
+          err?.error?.message ?? 'Import failed. Please try again.',
+        );
+        this.importing.set(false);
+      },
+    });
+  }
+
+  downloadTemplate(): void {
     this.http
-      .post(`${environment.apiUrl}/expenses/import`, formData)
+      .get(`${this.api}/import/template`, { responseType: 'blob' })
       .subscribe({
-        next: () => {
-          this.importing.set(false);
-          this.closed.emit(true);
-        },
-        error: (err) => {
-          const message =
-            err.error?.message ||
-            (typeof err.error === 'string' ? err.error : null) ||
-            'An unexpected error occurred during import.';
-          this.error.set(message);
-          this.importing.set(false);
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'expense-import-template.csv';
+          a.click();
+          URL.revokeObjectURL(url);
         },
       });
   }
 
-  downloadTemplate(): void {
-    const rows = [
-      'Title,Amount,Date,Category,Description',
-      'Lunch,15.00,2023-12-01,Food,Team Lunch',
-    ];
-    const csvContent = rows.join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'import_template.csv';
-    link.click();
-    window.URL.revokeObjectURL(url);
+  reset(): void {
+    this.step.set('upload');
+    this.preview.set(null);
+    this.result.set(null);
+    this.error.set('');
+    this.selectedFile = null;
   }
+
+  close(success = false): void {
+    this.closed.emit(success);
+  }
+
+  constructor(private http: HttpClient) {}
 }

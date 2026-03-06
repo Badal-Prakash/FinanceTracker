@@ -1,8 +1,26 @@
-<div class="import-overlay">
-  <div class="import-modal">
-    <div class="import-header">
-      <h2 class="import-title">Import Expenses</h2>
-      <button (click)="close()" class="btn-close">
+<div class="modal-backdrop" (click)="close()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <div class="modal-header__left">
+        <div class="modal-icon">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+            />
+          </svg>
+        </div>
+        <div>
+          <h2 class="modal-title">Import Expenses</h2>
+          <p class="modal-sub">
+            Upload a CSV or Excel file to bulk-add expenses
+          </p>
+        </div>
+      </div>
+      <button (click)="close()" class="close-btn">
         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             stroke-linecap="round"
@@ -14,73 +32,283 @@
       </button>
     </div>
 
-    <div class="import-content">
-      @if (!file()) {
-        <div
-          class="drop-zone"
-          (dragover)="$event.preventDefault()"
-          (drop)="onFileDropped($event)"
-          (click)="fileInput.click()"
-        >
-          <svg
-            class="drop-icon"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+    <!-- Step indicator -->
+    <div class="steps">
+      <div
+        [class]="
+          'step ' +
+          (step() === 'upload'
+            ? 'step--active'
+            : step() !== 'upload'
+              ? 'step--done'
+              : '')
+        "
+      >
+        <span class="step__num">1</span><span class="step__label">Upload</span>
+      </div>
+      <div class="step-line"></div>
+      <div
+        [class]="
+          'step ' +
+          (step() === 'preview'
+            ? 'step--active'
+            : step() === 'done'
+              ? 'step--done'
+              : '')
+        "
+      >
+        <span class="step__num">2</span><span class="step__label">Preview</span>
+      </div>
+      <div class="step-line"></div>
+      <div [class]="'step ' + (step() === 'done' ? 'step--active' : '')">
+        <span class="step__num">3</span><span class="step__label">Done</span>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <!-- ── Step 1: Upload ───────────────────────────────────────────────── -->
+      @if (step() === "upload") {
+        <!-- Template download -->
+        <div class="template-banner">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
               stroke-width="2"
-              d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
             />
           </svg>
-          <p class="drop-text">
-            <strong>Click to upload</strong> or drag and drop
-          </p>
-          <p class="drop-subtext">CSV or Excel (.xlsx) files supported</p>
-          <input
-            #fileInput
-            type="file"
-            hidden
-            accept=".csv, .xlsx"
-            (change)="onFileSelected($event)"
-          />
-        </div>
-
-        <div class="template-section">
-          <p>Need a starting point?</p>
-          <button (click)="downloadTemplate()" class="btn-link">
-            Download Template File
+          <span>Not sure about the format?</span>
+          <button (click)="downloadTemplate()" class="template-link">
+            Download template CSV
           </button>
         </div>
-      } @else {
-        <div class="preview-section">
-          <div class="file-summary">
-            <div class="file-icon">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
-            <div class="file-details">
-              <p class="file-name">{{ file()?.name }}</p>
-              <button
-                (click)="file.set(null); previewData.set([]); error.set(null)"
-                class="btn-link"
-              >
-                Change File
-              </button>
-            </div>
-          </div>
 
-          @if (loading()) {
-            <div class="loading-state">
-              <svg class="spinner" fill="none" viewBox="0 0 24 24">
+        <!-- Column format -->
+        <div class="format-info">
+          <p class="format-title">Required columns (in order):</p>
+          <div class="format-cols">
+            @for (
+              col of [
+                "Title",
+                "Description",
+                "Amount",
+                "Date (YYYY-MM-DD)",
+                "Category",
+              ];
+              track col
+            ) {
+              <span class="format-col">{{ col }}</span>
+            }
+          </div>
+        </div>
+
+        <!-- Drop zone -->
+        <div
+          [class]="'drop-zone ' + (dragging() ? 'drop-zone--active' : '')"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave()"
+          (drop)="onDrop($event)"
+        >
+          @if (uploading()) {
+            <svg class="spinner" fill="none" viewBox="0 0 24 24">
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                stroke-width="4"
+                style="opacity: 0.25"
+              />
+              <path
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                style="opacity: 0.75"
+              />
+            </svg>
+            <p class="drop-zone__text">Parsing file...</p>
+          } @else {
+            <svg
+              class="drop-zone__icon"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+              />
+            </svg>
+            <p class="drop-zone__text">Drag & drop your file here</p>
+            <p class="drop-zone__hint">or</p>
+            <label class="browse-btn">
+              Browse file
+              <input
+                type="file"
+                accept=".csv,.xlsx"
+                (change)="onFileSelect($event)"
+                hidden
+              />
+            </label>
+            <p class="drop-zone__formats">CSV or Excel (.xlsx) · Max 5MB</p>
+          }
+        </div>
+
+        @if (error()) {
+          <div class="error-banner">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {{ error() }}
+          </div>
+        }
+      }
+
+      <!-- ── Step 2: Preview ──────────────────────────────────────────────── -->
+      @if (step() === "preview" && preview()) {
+        <!-- Summary bar -->
+        <div class="preview-summary">
+          <div class="summary-item summary-item--green">
+            <span class="summary-num">{{ preview()!.validCount }}</span>
+            <span class="summary-label">Ready to import</span>
+          </div>
+          <div class="summary-item summary-item--red">
+            <span class="summary-num">{{ preview()!.errorCount }}</span>
+            <span class="summary-label">Rows with errors</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-num">{{ preview()!.rows.length }}</span>
+            <span class="summary-label">Total rows</span>
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div class="import-options">
+          <label class="option-row">
+            <input
+              type="checkbox"
+              [(ngModel)]="submitAfterImport"
+              class="checkbox"
+            />
+            <span>Submit expenses for approval after import</span>
+          </label>
+          <label class="option-row">
+            <input type="checkbox" [(ngModel)]="skipErrors" class="checkbox" />
+            <span>Skip invalid rows and import valid ones</span>
+          </label>
+        </div>
+
+        <!-- Row filter -->
+        @if (preview()!.errorCount > 0) {
+          <div class="row-filter">
+            <button
+              (click)="showOnlyErrors.set(false)"
+              [class]="
+                'filter-tab ' + (!showOnlyErrors() ? 'filter-tab--active' : '')
+              "
+            >
+              All rows
+            </button>
+            <button
+              (click)="showOnlyErrors.set(true)"
+              [class]="
+                'filter-tab ' + (showOnlyErrors() ? 'filter-tab--active' : '')
+              "
+            >
+              Errors only ({{ preview()!.errorCount }})
+            </button>
+          </div>
+        }
+
+        <!-- Preview table -->
+        <div class="preview-table-wrap">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Title</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Category</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of visibleRows(); track row.rowNumber) {
+                <tr [class]="row.isValid ? '' : 'row--error'">
+                  <td class="row-num">{{ row.rowNumber }}</td>
+                  <td>
+                    <p class="row-title">{{ row.title || "—" }}</p>
+                    @if (row.description) {
+                      <p class="row-desc">{{ row.description }}</p>
+                    }
+                  </td>
+                  <td class="row-amount">{{ row.amount | currency }}</td>
+                  <td>{{ row.expenseDate }}</td>
+                  <td>
+                    <span class="cat-badge">{{ row.category || "—" }}</span>
+                  </td>
+                  <td>
+                    @if (row.isValid) {
+                      <span class="status-ok">
+                        <svg
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                        Valid
+                      </span>
+                    } @else {
+                      <span class="status-err" [title]="row.error ?? ''">
+                        <svg
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          />
+                        </svg>
+                        {{ row.error }}
+                      </span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (error()) {
+          <div class="error-banner">{{ error() }}</div>
+        }
+
+        <div class="modal-footer">
+          <button (click)="reset()" class="btn-outline">← Change file</button>
+          <button
+            (click)="confirmImport()"
+            [disabled]="importing() || preview()!.validCount === 0"
+            class="btn-primary"
+          >
+            @if (importing()) {
+              <svg class="spinner-sm" fill="none" viewBox="0 0 24 24">
                 <circle
                   cx="12"
                   cy="12"
@@ -95,76 +323,59 @@
                   style="opacity: 0.75"
                 />
               </svg>
-              <p>Analyzing file...</p>
-            </div>
-          } @else if (error()) {
-            <div class="error-banner">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              {{ error() }}
-            </div>
-          } @else {
-            <div class="preview-table-wrapper">
-              <table class="preview-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (row of previewData(); track $index) {
-                    <tr>
-                      <td>{{ row.expenseDate | date: "MMM d, y" }}</td>
-                      <td>{{ row.title }}</td>
-                      <td>{{ row.categoryName }}</td>
-                      <td>{{ row.amount | currency }}</td>
-                      <td>
-                        @if (row.isValid) {
-                          <span class="badge badge-success">Valid</span>
-                        } @else {
-                          <span
-                            class="badge badge-error"
-                            [title]="row.errors?.join(', ')"
-                            >Invalid</span
-                          >
-                        }
-                      </td>
-                    </tr>
-                  }
-                </tbody>
-              </table>
-            </div>
+              Importing...
+            } @else {
+              Import {{ preview()!.validCount }} expense{{
+                preview()!.validCount !== 1 ? "s" : ""
+              }}
+            }
+          </button>
+        </div>
+      }
 
-            <div class="modal-actions">
-              <button
-                (click)="file.set(null); previewData.set([])"
-                class="btn-cancel"
+      <!-- ── Step 3: Done ─────────────────────────────────────────────────── -->
+      @if (step() === "done" && result()) {
+        <div class="done-state">
+          <div class="done-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M5 13l4 4L19 7"
+              />
+            </svg>
+          </div>
+          <h3 class="done-title">Import Complete</h3>
+          <p class="done-sub">
+            <strong>{{ result()!.imported }}</strong> expense{{
+              result()!.imported !== 1 ? "s" : ""
+            }}
+            imported successfully.
+            @if (result()!.skipped > 0) {
+              <span class="skipped-note"
+                >{{ result()!.skipped }} rows skipped.</span
               >
-                Cancel
-              </button>
-              <button
-                (click)="confirmImport()"
-                [disabled]="importing() || previewData().length === 0"
-                class="btn-primary"
-              >
-                @if (importing()) {
-                  Importing...
-                } @else {
-                  Import Expenses
-                }
-              </button>
+            }
+          </p>
+
+          @if (result()!.errors.length > 0) {
+            <div class="done-errors">
+              <p class="done-errors__title">Skipped rows:</p>
+              @for (e of result()!.errors; track e) {
+                <p class="done-errors__item">{{ e }}</p>
+              }
             </div>
           }
+
+          <div class="done-actions">
+            <button (click)="reset()" class="btn-outline">
+              Import another file
+            </button>
+            <button (click)="close(true)" class="btn-primary">
+              View expenses
+            </button>
+          </div>
         </div>
       }
     </div>
