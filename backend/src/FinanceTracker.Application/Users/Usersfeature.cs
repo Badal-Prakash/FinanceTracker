@@ -299,7 +299,7 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand>
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Id == _currentUser.UserId, ct)
-            ?? throw new NotFoundException(nameof(User), _currentUser.UserId);
+            ?? throw new KeyNotFoundException("User not found.");
 
         user.UpdateProfile(request.FirstName, request.LastName);
         await _context.SaveChangesAsync(ct);
@@ -337,12 +337,15 @@ public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordComman
     {
         var user = await _context.Users
             .FirstOrDefaultAsync(u => u.Id == _currentUser.UserId, ct)
-            ?? throw new NotFoundException(nameof(User), _currentUser.UserId);
+            ?? throw new KeyNotFoundException("User not found.");
 
-        if (!BC.Verify(request.CurrentPassword, user.PasswordHash))
+        // ✅ Verify in the handler, NOT in the entity
+        if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
             throw new InvalidOperationException("Current password is incorrect.");
 
-        user.ChangePassword(BC.HashPassword(request.NewPassword));
+        var newHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        user.ChangePassword(newHash);
+        user.ClearRefreshToken(); // force re-login on all devices
         await _context.SaveChangesAsync(ct);
     }
 }

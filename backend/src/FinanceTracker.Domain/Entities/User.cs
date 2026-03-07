@@ -50,12 +50,18 @@ public class User : BaseEntity
     public void Deactivate() => IsActive = false;
     public void Activate() => IsActive = true;
 
+    // Called by admin ResetPassword command (TeamFeature)
+    public void ResetPassword(string newHash) => PasswordHash = newHash;
+
+    // Called by user's own ChangePassword command — handler must verify old password first
+    public void ChangePassword(string newHash) => PasswordHash = newHash;
+
+    // Called by UpdateProfile command (UserFeature)
     public void UpdateProfile(string firstName, string lastName)
     {
-        FirstName = firstName;
-        LastName = lastName;
+        if (string.IsNullOrWhiteSpace(firstName)) throw new ArgumentException("First name is required.");
+        if (string.IsNullOrWhiteSpace(lastName)) throw new ArgumentException("Last name is required.");
+        FirstName = firstName.Trim();
+        LastName = lastName.Trim();
     }
-
-    public void ChangePassword(string newPasswordHash)
-        => PasswordHash = newPasswordHash;
 }

@@ -22,6 +22,7 @@ public static class DependencyInjection
             provider.GetRequiredService<ApplicationDbContext>());
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<IBlobStorageService, AzureBlobStorageService>();
+        services.AddHostedService<InvoiceOverdueBackgroundService>();
         return services;
     }
 }

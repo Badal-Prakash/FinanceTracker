@@ -39,7 +39,7 @@ type Step = 'upload' | 'preview' | 'done';
 @Component({
   selector: 'app-expense-import',
   standalone: true,
-  imports: [CommonModule, FormsModule, CurrencyPipe, DatePipe],
+  imports: [CommonModule, FormsModule, CurrencyPipe],
   templateUrl: './expense-import.component.html',
   styleUrl: './expense-import.component.scss',
 })

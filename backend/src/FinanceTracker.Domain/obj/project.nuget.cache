@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "mJKdQfRCXw0=",
+  "dgSpecHash": "iodaPnuGCr4=",
   "success": true,
   "projectFilePath": "/Users/badal/Desktop/FinanceTracker/backend/src/FinanceTracker.Domain/FinanceTracker.Domain.csproj",
   "expectedPackageFiles": [
@@ -30,7 +30,9 @@
     "/Users/badal/.nuget/packages/npgsql.entityframeworkcore.postgresql/9.0.0/npgsql.entityframeworkcore.postgresql.9.0.0.nupkg.sha512",
     "/Users/badal/.nuget/packages/system.buffers/4.6.0/system.buffers.4.6.0.nupkg.sha512",
     "/Users/badal/.nuget/packages/system.text.encodings.web/8.0.0/system.text.encodings.web.8.0.0.nupkg.sha512",
-    "/Users/badal/.nuget/packages/system.text.json/9.0.0/system.text.json.9.0.0.nupkg.sha512"
+    "/Users/badal/.nuget/packages/system.text.json/9.0.0/system.text.json.9.0.0.nupkg.sha512",
+    "/Users/badal/.nuget/packages/microsoft.netcore.app.ref/9.0.13/microsoft.netcore.app.ref.9.0.13.nupkg.sha512",
+    "/Users/badal/.nuget/packages/microsoft.aspnetcore.app.ref/9.0.13/microsoft.aspnetcore.app.ref.9.0.13.nupkg.sha512"
   ],
   "logs": []
 }

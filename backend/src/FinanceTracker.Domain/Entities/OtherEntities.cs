@@ -1,3 +1,4 @@
+using FinanceTracker.Domain.Events;
 using FinanceTracker.Domain.Common;
 using FinanceTracker.Domain.Enums;
 
@@ -93,12 +94,16 @@ public class Invoice : BaseEntity
 
         Status = InvoiceStatus.Paid;
         PaidAt = DateTime.UtcNow;
+        AddDomainEvent(new InvoicePaidEvent(this));
     }
 
     public void MarkAsOverdue()
     {
         if (Status == InvoiceStatus.Unpaid && DueDate < DateTime.UtcNow)
+        {
             Status = InvoiceStatus.Overdue;
+            AddDomainEvent(new InvoiceOverdueEvent(this));
+        }
     }
 
     public void Cancel() => Status = InvoiceStatus.Cancelled;

@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { roleGuard } from '../../core/guards/auth.guard';
 
 export const SHELL_ROUTES: Routes = [
   {
@@ -6,11 +7,9 @@ export const SHELL_ROUTES: Routes = [
     loadComponent: () =>
       import('./shell.component').then((m) => m.ShellComponent),
     children: [
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full',
-      },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+
+      // ── Dashboard ──────────────────────────────────────────────────────────
       {
         path: 'dashboard',
         loadComponent: () =>
@@ -18,6 +17,8 @@ export const SHELL_ROUTES: Routes = [
             (m) => m.DashboardComponent,
           ),
       },
+
+      // ── Expenses ───────────────────────────────────────────────────────────
       {
         path: 'expenses',
         loadComponent: () =>
@@ -39,6 +40,8 @@ export const SHELL_ROUTES: Routes = [
             (m) => m.ExpenseDetailComponent,
           ),
       },
+
+      // ── Invoices ───────────────────────────────────────────────────────────
       {
         path: 'invoices',
         children: [
@@ -72,8 +75,11 @@ export const SHELL_ROUTES: Routes = [
           },
         ],
       },
+
+      // ── Budgets — Manager+ only ────────────────────────────────────────────
       {
         path: 'budgets',
+        canActivate: [roleGuard('Manager', 'Admin', 'SuperAdmin')],
         children: [
           {
             path: '',
@@ -91,8 +97,11 @@ export const SHELL_ROUTES: Routes = [
           },
         ],
       },
+
+      // ── Users — Admin+ only ────────────────────────────────────────────────
       {
         path: 'users',
+        canActivate: [roleGuard('Admin', 'SuperAdmin')],
         children: [
           {
             path: '',
@@ -110,6 +119,18 @@ export const SHELL_ROUTES: Routes = [
           },
         ],
       },
+
+      // ── Team — Admin+ only ─────────────────────────────────────────────────
+      {
+        path: 'team',
+        canActivate: [roleGuard('Admin', 'SuperAdmin')],
+        loadComponent: () =>
+          import('../team/team-list/team-list.component').then(
+            (m) => m.TeamListComponent,
+          ),
+      },
+
+      // ── Profile ────────────────────────────────────────────────────────────
       {
         path: 'profile',
         loadComponent: () =>
@@ -117,11 +138,36 @@ export const SHELL_ROUTES: Routes = [
             (m) => m.UserProfileComponent,
           ),
       },
+
+      // ── Reports ────────────────────────────────────────────────────────────
       {
         path: 'reports',
         loadComponent: () =>
           import('../reports/reports.component').then(
             (m) => m.ReportsComponent,
+          ),
+      },
+
+      {
+        path: 'notifications',
+        loadComponent: () =>
+          import('../notification/notifications-page/notifications-page.component').then(
+            (m) => m.NotificationsPageComponent,
+          ),
+      },
+      {
+        path: 'audit-log',
+        canActivate: [roleGuard('Admin', 'SuperAdmin')],
+        loadComponent: () =>
+          import('../audit-log/audit-log.component').then(
+            (m) => m.AuditLogComponent,
+          ),
+      },
+      {
+        path: 'forbidden',
+        loadComponent: () =>
+          import('../errors/forbidden/forbidden.component').then(
+            (m) => m.ForbiddenComponent,
           ),
       },
     ],

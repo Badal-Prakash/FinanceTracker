@@ -13,6 +13,8 @@ public interface IApplicationDbContext
     DbSet<InvoiceLineItem> InvoiceLineItems { get; }
     DbSet<Budget> Budgets { get; }
     DbSet<Category> Categories { get; }
+    DbSet<Notification> Notifications { get; }
+    DbSet<AuditLog> AuditLogs { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

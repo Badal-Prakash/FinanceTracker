@@ -1,0 +1,273 @@
+<div class="page">
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Audit Log</h1>
+      <p class="page-sub">Full history of all changes made across the system</p>
+    </div>
+    @if (page()) {
+      <span class="total-badge">{{ page()!.totalCount | number }} records</span>
+    }
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <select
+      [(ngModel)]="entityName"
+      class="filter-select"
+      (change)="applyFilters()"
+    >
+      <option value="">All entities</option>
+      @for (e of entityOptions; track e) {
+        <option [value]="e">{{ e }}</option>
+      }
+    </select>
+
+    <select
+      [(ngModel)]="action"
+      class="filter-select"
+      (change)="applyFilters()"
+    >
+      <option value="">All actions</option>
+      @for (a of actionOptions; track a) {
+        <option [value]="a">{{ a }}</option>
+      }
+    </select>
+
+    <input
+      type="date"
+      [(ngModel)]="from"
+      class="filter-input"
+      placeholder="From"
+      (change)="applyFilters()"
+    />
+    <input
+      type="date"
+      [(ngModel)]="to"
+      class="filter-input"
+      placeholder="To"
+      (change)="applyFilters()"
+    />
+
+    @if (entityName || action || from || to) {
+      <button (click)="clearFilters()" class="btn-clear">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+        Clear
+      </button>
+    }
+  </div>
+
+  <!-- Table -->
+  @if (loading()) {
+    <div class="loading">
+      <svg class="spinner" fill="none" viewBox="0 0 24 24">
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+          style="opacity: 0.25"
+        />
+        <path
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          style="opacity: 0.75"
+        />
+      </svg>
+    </div>
+  } @else if (!page()?.items?.length) {
+    <div class="empty">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.5"
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+        />
+      </svg>
+      <p>No audit records found</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Who</th>
+            <th>Action</th>
+            <th>Entity</th>
+            <th>Changes</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of page()!.items; track log.id) {
+            <tr
+              class="row"
+              [class.row--expanded]="expanded() === log.id"
+              (click)="toggleExpand(log.id)"
+            >
+              <td class="cell cell--time">
+                <span class="time-primary">{{
+                  log.timestamp | date: "MMM d, y"
+                }}</span>
+                <span class="time-secondary">{{
+                  log.timestamp | date: "HH:mm:ss"
+                }}</span>
+              </td>
+              <td class="cell cell--user">
+                <span class="avatar">{{ log.userEmail[0].toUpperCase() }}</span>
+                <span class="email">{{ log.userEmail }}</span>
+              </td>
+              <td class="cell">
+                <span [class]="'badge ' + actionClass(log.action)">
+                  {{ actionIcon(log.action) }} {{ log.action }}
+                </span>
+              </td>
+              <td class="cell cell--entity">
+                <span class="entity-name">{{ log.entityName }}</span>
+                <span class="entity-id"
+                  >{{ log.entityId | slice: 0 : 8 }}…</span
+                >
+              </td>
+              <td class="cell cell--fields">
+                @if (log.changedFields) {
+                  <div class="fields">
+                    @for (f of changedFieldsList(log); track f) {
+                      <span class="field-chip">{{ f }}</span>
+                    }
+                  </div>
+                } @else {
+                  <span class="text-muted">—</span>
+                }
+              </td>
+              <td class="cell cell--toggle">
+                <svg
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  [class.rotated]="expanded() === log.id"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </td>
+            </tr>
+
+            <!-- Expanded diff panel -->
+            @if (expanded() === log.id) {
+              <tr class="diff-row">
+                <td colspan="6">
+                  <div class="diff-panel">
+                    @if (log.action === "Updated") {
+                      <div class="diff-cols">
+                        <div class="diff-col">
+                          <p class="diff-col__title diff-col__title--old">
+                            Before
+                          </p>
+                          @for (
+                            entry of parseJson(log.oldValues) | keyvalue;
+                            track entry.key
+                          ) {
+                            <div class="diff-line diff-line--old">
+                              <span class="diff-key">{{ entry.key }}</span>
+                              <span class="diff-val">{{ entry.value }}</span>
+                            </div>
+                          }
+                        </div>
+                        <div class="diff-col">
+                          <p class="diff-col__title diff-col__title--new">
+                            After
+                          </p>
+                          @for (
+                            entry of parseJson(log.newValues) | keyvalue;
+                            track entry.key
+                          ) {
+                            <div class="diff-line diff-line--new">
+                              <span class="diff-key">{{ entry.key }}</span>
+                              <span class="diff-val">{{ entry.value }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    } @else if (log.action === "Created") {
+                      <p class="diff-col__title diff-col__title--new">
+                        Created with values
+                      </p>
+                      <div class="diff-grid">
+                        @for (
+                          entry of parseJson(log.newValues) | keyvalue;
+                          track entry.key
+                        ) {
+                          <span class="diff-key">{{ entry.key }}</span>
+                          <span class="diff-val">{{ entry.value }}</span>
+                        }
+                      </div>
+                    } @else {
+                      <p class="diff-col__title diff-col__title--old">
+                        Deleted record
+                      </p>
+                      <div class="diff-grid">
+                        @for (
+                          entry of parseJson(log.oldValues) | keyvalue;
+                          track entry.key
+                        ) {
+                          <span class="diff-key">{{ entry.key }}</span>
+                          <span class="diff-val">{{ entry.value }}</span>
+                        }
+                      </div>
+                    }
+                    @if (log.ipAddress) {
+                      <p class="diff-meta">IP: {{ log.ipAddress }}</p>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    @if (page()!.totalPages > 1) {
+      <div class="pagination">
+        <button
+          (click)="goTo(currentPage - 1)"
+          [disabled]="currentPage === 1"
+          class="page-btn"
+        >
+          ‹ Prev
+        </button>
+        @for (p of pages; track p) {
+          <button
+            (click)="goTo(p)"
+            [class.page-btn--active]="p === currentPage"
+            class="page-btn"
+          >
+            {{ p }}
+          </button>
+        }
+        <button
+          (click)="goTo(currentPage + 1)"
+          [disabled]="currentPage === page()!.totalPages"
+          class="page-btn"
+        >
+          Next ›
+        </button>
+      </div>
+    }
+  }
+</div>

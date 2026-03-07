@@ -1,0 +1,125 @@
+<div class="page">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-sub">Stay up to date with your team's activity</p>
+    </div>
+    @if (unreadCount > 0) {
+      <button (click)="markAllRead()" class="btn-outline">
+        Mark all as read ({{ unreadCount }})
+      </button>
+    }
+  </div>
+
+  <!-- Filter tabs -->
+  <div class="tabs">
+    <button
+      [class]="'tab ' + (filter() === 'all' ? 'tab--active' : '')"
+      (click)="setFilter('all')"
+    >
+      All
+    </button>
+    <button
+      [class]="'tab ' + (filter() === 'unread' ? 'tab--active' : '')"
+      (click)="setFilter('unread')"
+    >
+      Unread
+      @if (unreadCount > 0) {
+        <span class="tab-badge">{{ unreadCount }}</span>
+      }
+    </button>
+  </div>
+
+  <!-- List -->
+  @if (loading()) {
+    <div class="loading">
+      <svg class="spinner" fill="none" viewBox="0 0 24 24">
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          stroke-width="4"
+          style="opacity: 0.25"
+        />
+        <path
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+          style="opacity: 0.75"
+        />
+      </svg>
+    </div>
+  } @else if (notifications().length === 0) {
+    <div class="empty">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.5"
+          d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+        />
+      </svg>
+      <p>
+        {{
+          filter() === "unread"
+            ? "No unread notifications"
+            : "You're all caught up!"
+        }}
+      </p>
+    </div>
+  } @else {
+    <div class="notif-list">
+      @for (n of notifications(); track n.id) {
+        <div
+          [class]="'notif-row ' + (!n.isRead ? 'notif-row--unread' : '')"
+          (click)="navigate(n)"
+        >
+          <div [class]="'notif-icon ' + typeClass(n.type)">
+            {{ typeIcon(n.type) }}
+          </div>
+
+          <div class="notif-body">
+            <div class="notif-top">
+              <p class="notif-title">{{ n.title }}</p>
+              <span class="notif-time">{{ timeAgo(n.createdAt) }}</span>
+            </div>
+            <p class="notif-message">{{ n.message }}</p>
+          </div>
+
+          <div class="notif-actions">
+            @if (!n.isRead) {
+              <button
+                (click)="markRead(n); $event.stopPropagation()"
+                class="icon-btn"
+                title="Mark as read"
+              >
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              </button>
+            }
+            <button
+              (click)="delete(n, $event)"
+              class="icon-btn icon-btn--delete"
+              title="Delete"
+            >
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

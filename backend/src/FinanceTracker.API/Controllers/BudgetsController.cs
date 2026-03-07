@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FinanceTracker.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
     [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
     public class BudgetsController : BaseController
     {
         // GET /api/budgets/summary?month=3&year=2026
@@ -22,23 +22,17 @@ namespace FinanceTracker.API.Controllers
             [FromQuery] int months = 6)
             => Ok(await Mediator.Send(new GetBudgetTrendQuery(months)));
 
-        // POST /api/budgets  (upsert: create or update)
+        // POST /api/budgets  (upsert — creates or updates for the given month/category)
         [HttpPost]
         [Authorize(Roles = "Admin,SuperAdmin,Manager")]
         public async Task<ActionResult<Guid>> Set([FromBody] SetBudgetCommand command)
-        {
-            var id = await Mediator.Send(command);
-            return Ok(id);
-        }
+            => Ok(await Mediator.Send(command));
 
         // POST /api/budgets/copy
         [HttpPost("copy")]
         [Authorize(Roles = "Admin,SuperAdmin,Manager")]
         public async Task<ActionResult<int>> Copy([FromBody] CopyBudgetsCommand command)
-        {
-            var count = await Mediator.Send(command);
-            return Ok(count);
-        }
+            => Ok(await Mediator.Send(command));
 
         // DELETE /api/budgets/{id}
         [HttpDelete("{id:guid}")]
@@ -49,6 +43,4 @@ namespace FinanceTracker.API.Controllers
             return NoContent();
         }
     }
-
-
 }

@@ -1,8 +1,7 @@
-// ─── models/auth.model.ts ────────────────────────────────────────────────────
 export interface AuthResponse {
   accessToken: string;
   refreshToken: string;
-  expiresAt: string;
+  expiresAt: string; // ISO date string — used for token expiry check
   user: UserInfo;
 }
 
